@@ -1,0 +1,15 @@
+# Archivos de configuración de IDEs de BD
+.dbeaver/
+.idea/
+.vscode/
+*.log
+*.bak
+
+# Credenciales y variables de entorno local
+*.env
+tnsnames.ora
+sqlnet.log
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
