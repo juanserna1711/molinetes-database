@@ -56,6 +56,8 @@ end;
  
 PROCEDURE actualizarTalla ( cod_talla NUMBER, nom_talla VARCHAR2, esta_talla VARCHAR2, ancho_rendtall NUMBER, peso_rendtall NUMBER, rollo_rendtall NUMBER, usuario_rendtall NUMBER ) is 
  
+    rendimiento_rendtall NUMBER;
+    metros_rendtall      NUMBER;
     begin 
  
         -- Validaciones 
@@ -78,9 +80,29 @@ PROCEDURE actualizarTalla ( cod_talla NUMBER, nom_talla VARCHAR2, esta_talla VAR
                 -20003, 
                 'El peso del rollo debe ser mayor que cero.' 
             ); 
-        END IF; 
+        END IF;
+
+         -- Cálculos de rendimiento
+        rendimiento_rendtall := 1000 / ((ancho_rendtall * 2 / 100) * peso_rendtall);
+        metros_rendtall := rollo_rendtall * rendimiento_rendtall;
  
- 
+
+        -- Validación según precisión de RETAREND NUMBER(2,1)
+        IF rendimiento_rendtall > 9.9 THEN
+            RAISE_APPLICATION_ERROR(
+                -20007,
+                'El rendimiento calculado supera el máximo permitido de 9.9.'
+            );
+        END IF;
+
+        -- Validación según precisión de RETAMETR NUMBER(4,1)
+        IF metros_rendtall > 999.9 THEN
+            RAISE_APPLICATION_ERROR(
+                -20008,
+                'Los metros por rollo calculados superan el máximo permitido de 999.9.'
+            );
+        END IF;
+
  
         UPDATE TALLA 
  
@@ -98,7 +120,7 @@ PROCEDURE actualizarTalla ( cod_talla NUMBER, nom_talla VARCHAR2, esta_talla VAR
  
         UPDATE RENDTALL 
  
-        SET RETAANCH = ancho_rendtall, RETAPESO = peso_rendtall, RETAROLL = rollo_rendtall, RETAREND = 1000/ ((ancho_rendtall*2/100)*peso_rendtall), RETAMETR = rollo_rendtall * (1000/ ((ancho_rendtall*2/100)*peso_rendtall)),  RETAFEGE = SYSDATE, RETAUSUA = usuario_rendtall 
+        SET RETAANCH = ancho_rendtall, RETAPESO = peso_rendtall, RETAROLL = rollo_rendtall, RETAREND = rendimiento_rendtall, RETAMETR = metros_rendtall,  RETAFEGE = SYSDATE, RETAUSUA = usuario_rendtall 
  
         WHERE RETATALL = cod_talla; 
  
@@ -203,7 +225,8 @@ PROCEDURE eliminarTalla (cod_talla number) is
   
  
 PROCEDURE insertarTalla (cod_talla number, nom_talla varchar2, esta_talla varchar2, ancho_rendtall number, peso_rendtall number, rollo_rendtall number, usuario_rendtall number) is 
- 
+    rendimiento_rendtall NUMBER;
+    metros_rendtall      NUMBER;
     begin
         
         -- Validaciones
@@ -226,7 +249,29 @@ PROCEDURE insertarTalla (cod_talla number, nom_talla varchar2, esta_talla varcha
                 -20003, 
                 'El peso del rollo debe ser mayor que cero.' 
             ); 
-        END IF; 
+        END IF;
+
+        -- Cálculos de rendimiento
+        rendimiento_rendtall := 1000 / ((ancho_rendtall * 2 / 100) * peso_rendtall);
+        metros_rendtall := rollo_rendtall * rendimiento_rendtall;
+
+        
+        -- Validación según precisión de RETAREND NUMBER(2,1)
+        IF rendimiento_rendtall > 9.9 THEN
+            RAISE_APPLICATION_ERROR(
+                -20007,
+                'El rendimiento calculado supera el máximo permitido de 9.9.'
+            );
+        END IF;
+
+        -- Validación según precisión de RETAMETR NUMBER(4,1)
+        IF metros_rendtall > 999.9 THEN
+            RAISE_APPLICATION_ERROR(
+                -20008,
+                'Los metros por rollo calculados superan el máximo permitido de 999.9.'
+            );
+        END IF;
+
  
         INSERT INTO TALLA (TALLCODI, TALLNOMB, TALLESTA) 
  
@@ -234,7 +279,7 @@ PROCEDURE insertarTalla (cod_talla number, nom_talla varchar2, esta_talla varcha
  
         INSERT INTO RENDTALL (RETATALL, RETAANCH, RETAPESO, RETAROLL, RETAREND, RETAMETR, RETAFEGE, RETAUSUA) 
  
-        VALUES (cod_talla, ancho_rendtall, peso_rendtall, rollo_rendtall, 1000/((ancho_rendtall*2/100)*peso_rendtall), rollo_rendtall * (1000/((ancho_rendtall*2/100)*peso_rendtall)), SYSDATE, usuario_rendtall); 
+        VALUES (cod_talla, ancho_rendtall, peso_rendtall, rollo_rendtall, rendimiento_rendtall, metros_rendtall, SYSDATE, usuario_rendtall); 
  
         -- Confirma la creación de TALLA y su RENDTALL asociado.
         COMMIT; 
