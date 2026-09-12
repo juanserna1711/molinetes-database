@@ -1,11 +1,11 @@
-CREATE OR REPLACE package PKG_TALLA
+CREATE OR REPLACE package PKG_RENDTALLA
 
 as
 
  
 
 --=============================================================================
--- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_TALLA` para la gestión de TALLA y su RENDTALL asociado.
+-- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_RENDTALLA` para la gestión de TALLA y su RENDTALL asociado.
 --
 -- Autor: JUAN ANDRES SERNA CASTRO
 -- Fecha_creacion: 09/Septiembre/2026
@@ -25,8 +25,8 @@ as
 ---------------------------------------------------------------------------
 
 
--- Consultar TALLA
-PROCEDURE consultaTalla (
+-- Consultar TALLA y su RENDIMIENTO asociado
+PROCEDURE consultaRendTalla (
     cod_talla NUMBER,  
     nom_talla VARCHAR2, 
     esta_talla VARCHAR2, 
@@ -36,22 +36,24 @@ PROCEDURE consultaTalla (
 -- UPDATES
 ---------------------------------------------------------------------------
 
--- Actualización de TALLA
-PROCEDURE actualizarTalla (
+-- Actualización de TALLA y su RENDIMIENTO asociado
+PROCEDURE actualizarRendTalla (
     cod_talla NUMBER,
     nom_talla VARCHAR2,
-    esta_talla VARCHAR2
+    esta_talla VARCHAR2,
+    ancho_rendtall NUMBER,
+    peso_rendtall NUMBER,
+    rollo_rendtall NUMBER,
+    usuario_rendtall NUMBER
 );
 
 
--- Activar TALLA
-PROCEDURE activarTalla (
-    cod_talla NUMBER
-);
+---------------------------------------------------------------------------
+-- DELETES
+---------------------------------------------------------------------------
 
-
--- Desactivar TALLA
-PROCEDURE desactivarTalla (
+-- Eliminación de TALLA y su RENDIMIENTO asociado
+PROCEDURE eliminarRendTalla (
     cod_talla NUMBER
 );
 
@@ -59,15 +61,19 @@ PROCEDURE desactivarTalla (
 -- INSERTS
 ---------------------------------------------------------------------------
 
---Insertar TALLA
-PROCEDURE insertarTalla (
+--Insertar TALLA y su RENDIMIENTO asociado
+PROCEDURE insertarRendTalla (
     cod_talla NUMBER,
     nom_talla VARCHAR2,
-    esta_talla VARCHAR2
+    esta_talla VARCHAR2,
+    ancho_rendtall NUMBER,
+    peso_rendtall NUMBER,
+    rollo_rendtall NUMBER,
+    usuario_rendtall NUMBER
 );
 
 -----------------------------------------------------------------------------------------------------------------
 
-end PKG_TALLA;
+end PKG_RENDTALLA;
 
 /
