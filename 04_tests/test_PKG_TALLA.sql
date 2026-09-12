@@ -26,20 +26,12 @@ SELECT *
 FROM TALLA
 ORDER BY TALLCODI;
 
-SELECT *
-FROM RENDTALL
-ORDER BY RETATALL;
-
 
 -- Verificar que la talla 12 no exista antes de comenzar las pruebas.
 
 SELECT *
 FROM TALLA
 WHERE TALLCODI = 12;
-
-SELECT *
-FROM RENDTALL
-WHERE RETATALL = 12;
 
 
 --=============================================================================
@@ -51,11 +43,7 @@ BEGIN
     PKG_TALLA.insertarTalla(
         cod_talla        => 12,
         nom_talla        => 'TALLA PRUEBA',
-        esta_talla       => 'A',
-        ancho_rendtall   => 50,
-        peso_rendtall    => 200,
-        rollo_rendtall   => 100,
-        usuario_rendtall => 1
+        esta_talla       => 'A'
     );
 
 END;
@@ -67,17 +55,8 @@ END;
 SELECT
     t.TALLCODI,
     t.TALLNOMB,
-    t.TALLESTA,
-    r.RETAANCH,
-    r.RETAPESO,
-    r.RETAROLL,
-    r.RETAREND,
-    r.RETAMETR,
-    r.RETAFEGE,
-    r.RETAUSUA
+    t.TALLESTA
 FROM TALLA t
-INNER JOIN RENDTALL r
-    ON t.TALLCODI = r.RETATALL
 WHERE t.TALLCODI = 12;
 
 
@@ -174,11 +153,7 @@ BEGIN
     PKG_TALLA.actualizarTalla(
         cod_talla        => 12,
         nom_talla        => 'TALLA PRUEBA ACTUALIZADA',
-        esta_talla       => 'A',
-        ancho_rendtall   => 55,
-        peso_rendtall    => 180,
-        rollo_rendtall   => 80,
-        usuario_rendtall => 1
+        esta_talla       => 'A'
     );
 
 END;
@@ -190,15 +165,8 @@ END;
 SELECT
     t.TALLCODI,
     t.TALLNOMB,
-    t.TALLESTA,
-    r.RETAANCH,
-    r.RETAPESO,
-    r.RETAROLL,
-    r.RETAREND,
-    r.RETAMETR
+    t.TALLESTA
 FROM TALLA t
-INNER JOIN RENDTALL r
-    ON t.TALLCODI = r.RETATALL
 WHERE t.TALLCODI = 12;
 
 
@@ -249,80 +217,6 @@ SELECT
 FROM TALLA
 WHERE TALLCODI = 12;
 
-
---=============================================================================
--- 9. PRUEBAS DE VALIDACIONES
---=============================================================================
-
--------------------------------------------------------------------------------
--- 9.1 Ancho igual a cero
--------------------------------------------------------------------------------
-
-BEGIN
-
-    PKG_TALLA.actualizarTalla(
-        cod_talla        => 12,
-        nom_talla        => 'TALLA PRUEBA',
-        esta_talla       => 'A',
-        ancho_rendtall   => 0,
-        peso_rendtall    => 180,
-        rollo_rendtall   => 80,
-        usuario_rendtall => 1
-    );
-
-END;
-/
-
--- Se espera:
--- ORA-20001: El ancho de la talla debe ser mayor que cero.
-
-
--------------------------------------------------------------------------------
--- 9.2 Peso igual a cero
--------------------------------------------------------------------------------
-
-BEGIN
-
-    PKG_TALLA.actualizarTalla(
-        cod_talla        => 12,
-        nom_talla        => 'TALLA PRUEBA',
-        esta_talla       => 'A',
-        ancho_rendtall   => 55,
-        peso_rendtall    => 0,
-        rollo_rendtall   => 80,
-        usuario_rendtall => 1
-    );
-
-END;
-/
-
--- Se espera:
--- ORA-20002: El peso debe ser mayor que cero.
-
-
--------------------------------------------------------------------------------
--- 9.3 Peso del rollo igual a cero
--------------------------------------------------------------------------------
-
-BEGIN
-
-    PKG_TALLA.actualizarTalla(
-        cod_talla        => 12,
-        nom_talla        => 'TALLA PRUEBA',
-        esta_talla       => 'A',
-        ancho_rendtall   => 55,
-        peso_rendtall    => 180,
-        rollo_rendtall   => 0,
-        usuario_rendtall => 1
-    );
-
-END;
-/
-
--- Se espera:
--- ORA-20003: El peso del rollo debe ser mayor que cero.
-
-
 --=============================================================================
 -- 10. PRUEBA DE TALLA INEXISTENTE
 --=============================================================================
@@ -332,48 +226,14 @@ BEGIN
     PKG_TALLA.actualizarTalla(
         cod_talla        => 999,
         nom_talla        => 'NO EXISTE',
-        esta_talla       => 'A',
-        ancho_rendtall   => 50,
-        peso_rendtall    => 200,
-        rollo_rendtall   => 100,
-        usuario_rendtall => 1
+        esta_talla       => 'A'
     );
 
 END;
 /
 
 -- Se espera:
--- ORA-20005: La talla indicada no existe.
-
-
---=============================================================================
--- 11. PRUEBA DE ELIMINAR TALLA DE PRUEBA
---=============================================================================
-
-BEGIN
-
-    PKG_TALLA.eliminarTalla(
-        cod_talla => 12
-    );
-
-END;
-/
-
-
---=============================================================================
--- 12. VERIFICAR QUE LA TALLA Y RENDTALL FUERON ELIMINADOS
---=============================================================================
-
-SELECT *
-FROM TALLA
-WHERE TALLCODI = 12;
-
-SELECT *
-FROM RENDTALL
-WHERE RETATALL = 12;
-
-
--- Ambos SELECT deberían devolver 0 registros.
+-- ORA-20004: La talla indicada no existe.
 
 
 --=============================================================================
@@ -383,15 +243,8 @@ WHERE RETATALL = 12;
 SELECT
     t.TALLCODI,
     t.TALLNOMB,
-    t.TALLESTA,
-    r.RETAANCH,
-    r.RETAPESO,
-    r.RETAROLL,
-    r.RETAREND,
-    r.RETAMETR
+    t.TALLESTA
 FROM TALLA t
-INNER JOIN RENDTALL r
-    ON t.TALLCODI = r.RETATALL
 ORDER BY t.TALLCODI;
 
 
