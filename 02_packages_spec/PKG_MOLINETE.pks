@@ -1,17 +1,17 @@
-CREATE OR REPLACE package PKG_TALLA
+CREATE OR REPLACE package PKG_MOLINETE
 
 as
 
  
 
 --=============================================================================
--- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_TALLA` para la gestión de TALLA.
+-- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_MOLINETE` para la gestión de los molinetes.
 --
 -- Autor: JUAN ANDRES SERNA CASTRO
--- Fecha_creacion: 09/Septiembre/2026
+-- Fecha_creacion: 13/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Gestionar las operaciones de consulta, inserción, actualización, eliminación y activación de TALLA.
+-- Gestionar las operaciones de consulta, inserción, actualización y eliminación de los molinetes.
 --
 -- Historial_modificaciones:
 --
@@ -25,58 +25,48 @@ as
 ---------------------------------------------------------------------------
 
 
--- Consultar TALLA
-PROCEDURE consultaTalla (
-    cod_talla NUMBER,  
-    nom_talla VARCHAR2, 
-    esta_talla VARCHAR2, 
+-- Consultar MOLINETE
+PROCEDURE consultaMolinete (
+    cod_molinete NUMBER,  
+    nom_molinete VARCHAR2,
     cursor out sys_refcursor
 );
 ---------------------------------------------------------------------------
 -- UPDATES
 ---------------------------------------------------------------------------
 
--- Actualización de TALLA
-PROCEDURE actualizarTalla (
-    cod_talla NUMBER,
-    nom_talla VARCHAR2,
-    esta_talla VARCHAR2
+-- Actualización de MOLINETE
+PROCEDURE actualizarMolinete (
+    cod_molinete NUMBER,
+    nom_molinete VARCHAR2,
+    rpm_molinete NUMBER,
+    peri_molinete NUMBER
 );
 
-
--- Activar TALLA
-PROCEDURE activarTalla (
-    cod_talla NUMBER
-);
-
-
--- Desactivar TALLA
-PROCEDURE desactivarTalla (
-    cod_talla NUMBER
-);
 
 ---------------------------------------------------------------------------
 -- DELETES
 ---------------------------------------------------------------------------
 
--- Eliminación de TALLA
-PROCEDURE eliminarTalla (
-    cod_talla NUMBER
+-- Eliminación de MOLINETE
+PROCEDURE eliminarMolinete (
+    cod_molinete NUMBER
 );
 
 ---------------------------------------------------------------------------
 -- INSERTS
 ---------------------------------------------------------------------------
 
---Insertar TALLA
-PROCEDURE insertarTalla (
-    cod_talla NUMBER,
-    nom_talla VARCHAR2,
-    esta_talla VARCHAR2
+--Insertar MOLINETE
+PROCEDURE insertarMolinete (
+    cod_molinete NUMBER,
+    nom_molinete VARCHAR2,
+    rpm_molinete NUMBER,
+    peri_molinete NUMBER
 );
 
 -----------------------------------------------------------------------------------------------------------------
 
-end PKG_TALLA;
+end PKG_MOLINETE;
 
 /
