@@ -24,7 +24,7 @@
 
 SELECT *
 FROM USUARIO
-ORDER BY USUCCODI;
+ORDER BY USUACODI;
 
 
 -- Verificar que el usuario 99 no exista antes de comenzar las pruebas.
@@ -43,6 +43,7 @@ BEGIN
     PKG_USUARIO.insertarUsuario(
         cod_usuario      => 99,
         nom_usuario      => 'USUARIO PRUEBA',
+        pass_usuario     => '123456',
         esta_usuario     => 'A'
     );
 
@@ -53,11 +54,12 @@ END;
 -- Verificar que se haya creado el usuario.
 
 SELECT
-    u.USUACCODI,
+    u.USUACODI,
     u.USUANOMB,
+    u.USUAPASS,
     u.USUAESTA
 FROM USUARIO u
-WHERE u.USUACCODI = 99;
+WHERE u.USUACODI = 99;
 
 
 --=============================================================================
@@ -153,6 +155,7 @@ BEGIN
     PKG_USUARIO.actualizarUsuario(
         cod_usuario      => 99,
         nom_usuario      => 'USUARIO PRUEBA ACTUALIZADO',
+        pass_usuario    => '654321',
         esta_usuario     => 'A'
     );
 
@@ -163,11 +166,12 @@ END;
 -- Verificar actualización y cálculos.
 
 SELECT
-    u.USUACCODI,
+    u.USUACODI,
     u.USUANOMB,
+    u.USUAPASS,
     u.USUAESTA
 FROM USUARIO u
-WHERE u.USUACCODI = 99;
+WHERE u.USUACODI = 99;
 
 
 --=============================================================================
@@ -187,11 +191,12 @@ END;
 -- Verificar que el estado haya cambiado a I.
 
 SELECT
-    u.USUACCODI,
+    u.USUACODI,
     u.USUANOMB,
+    u.USUAPASS,
     u.USUAESTA
 FROM USUARIO u
-WHERE u.USUACCODI = 99;
+WHERE u.USUACODI = 99;
 
 
 --=============================================================================
@@ -211,11 +216,12 @@ END;
 -- Verificar que el estado haya cambiado nuevamente a A.
 
 SELECT
-    u.USUACCODI,
+    u.USUACODI,
     u.USUANOMB,
+    u.USUAPASS,
     u.USUAESTA
 FROM USUARIO u
-WHERE u.USUACCODI = 99;
+WHERE u.USUACODI = 99;
 
 --=============================================================================
 -- 9. PRUEBA DE ELIMINAR USUARIO DE PRUEBA
@@ -254,11 +260,12 @@ END;
 --=============================================================================
 
 SELECT
-    u.USUACCODI,
+    u.USUACODI,
     u.USUANOMB,
+    u.USUAPASS,
     u.USUAESTA
 FROM USUARIO u
-ORDER BY u.USUACCODI;
+ORDER BY u.USUACODI;
 
 
 --=============================================================================

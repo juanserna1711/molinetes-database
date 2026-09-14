@@ -11,7 +11,7 @@ as
 -- Fecha_creacion: 09/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Gestionar las operaciones de consulta, inserción, actualización y activación de TALLA.
+-- Gestionar las operaciones de consulta, inserción, actualización, eliminación y activación de TALLA.
 --
 -- Historial_modificaciones:
 --
@@ -52,6 +52,15 @@ PROCEDURE activarTalla (
 
 -- Desactivar TALLA
 PROCEDURE desactivarTalla (
+    cod_talla NUMBER
+);
+
+---------------------------------------------------------------------------
+-- DELETES
+---------------------------------------------------------------------------
+
+-- Eliminación de TALLA
+PROCEDURE eliminarTalla (
     cod_talla NUMBER
 );
 

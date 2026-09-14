@@ -10,7 +10,7 @@ as
 -- Fecha_creacion: 09/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Implementar las operaciones de consulta, actualización, activación,
+-- Implementar las operaciones de consulta, actualización, eliminación, activación,
 -- desactivación e inserción de TALLA.
 --
 --
@@ -109,6 +109,43 @@ PROCEDURE desactivarTalla ( cod_talla NUMBER) is
  
     end; 
  
+PROCEDURE eliminarTalla (cod_talla number) is 
+    v_registros_rend NUMBER := 0;
+ 
+    begin
+
+        -- Validar si existen registros de rendimiento asociados a la talla
+        SELECT COUNT(*)
+        INTO v_registros_rend
+        FROM RENDTALL
+        WHERE RETATALL = cod_talla;
+
+        IF v_registros_rend > 0 THEN
+            RAISE_APPLICATION_ERROR(
+                -20012,
+                'No se puede eliminar la talla porque tiene registros de rendimiento asociados.'
+            );
+        
+        END IF;
+ 
+        DELETE 
+ 
+        FROM TALLA 
+ 
+        WHERE TALLCODI = cod_talla; 
+ 
+        -- Valida que la TALLA haya existido antes de confirmar la eliminación.
+        IF SQL%ROWCOUNT = 0 THEN 
+            RAISE_APPLICATION_ERROR( 
+                -20004, 
+                'La talla indicada no existe.' 
+            ); 
+        END IF; 
+ 
+        -- Confirma la eliminación de TALLA.
+        COMMIT; 
+ 
+    end; 
   
  
 PROCEDURE insertarTalla (cod_talla number, nom_talla varchar2, esta_talla varchar2) is 

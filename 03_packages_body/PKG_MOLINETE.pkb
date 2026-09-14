@@ -27,7 +27,9 @@ begin
     OPEN cursor FOR 
         SELECT 
             MOLICODI, 
-            MOLINOMB
+            MOLINOMB,
+            MOLIRPM,
+            MOLIPERI
         FROM MOLINETE
         WHERE (cod_molinete IS NULL OR MOLICODI = cod_molinete) 
           AND (nom_molinete IS NULL OR 
@@ -40,14 +42,6 @@ end;
 PROCEDURE actualizarMolinete ( cod_molinete NUMBER, nom_molinete VARCHAR2, rpm_molinete NUMBER, peri_molinete NUMBER) is 
 
     begin
-
-        -- Valida que el MOLINETE exista.
-        IF SQL%ROWCOUNT = 0 THEN 
-            RAISE_APPLICATION_ERROR( 
-                -20009, 
-                'El molinete indicado no existe.' 
-            ); 
-        END IF;
 
         -- Valida que el RPM sea válido.
         IF rpm_molinete <= 0 OR rpm_molinete > 999 THEN 
@@ -70,6 +64,14 @@ PROCEDURE actualizarMolinete ( cod_molinete NUMBER, nom_molinete VARCHAR2, rpm_m
         SET MOLINOMB =  nom_molinete, MOLIRPM = rpm_molinete, MOLIPERI = peri_molinete 
  
         WHERE MOLICODI = cod_molinete; 
+
+        -- Valida que el MOLINETE exista.
+        IF SQL%ROWCOUNT = 0 THEN 
+            RAISE_APPLICATION_ERROR( 
+                -20009, 
+                'El molinete indicado no existe.' 
+            ); 
+        END IF;
  
         -- Confirma la actualización de MOLINETE.
         COMMIT;

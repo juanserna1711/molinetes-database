@@ -41,7 +41,7 @@ begin
             r.RETAFEGE, 
             u.USUANOMB AS NOMBRE_USUARIO 
         FROM TALLA t 
-        INNER JOIN RENDTALL r 
+        LEFT JOIN RENDTALL r 
             ON t.TALLCODI = r.RETATALL 
         LEFT JOIN USUARIO u 
             ON r.RETAUSUA = u.USUACODI 
@@ -125,14 +125,28 @@ PROCEDURE actualizarRendTalla ( cod_talla NUMBER, nom_talla VARCHAR2, esta_talla
         WHERE RETATALL = cod_talla; 
  
         -- Valida que la TALLA tenga información de RENDTALL asociada.
-        -- Si no existe, se revierte la actualización de TALLA para mantener la integridad de la operación.
-        IF SQL%ROWCOUNT = 0 THEN 
-            ROLLBACK; 
-            RAISE_APPLICATION_ERROR( 
-                -20005, 
-                'La talla no tiene información de rendimiento asociada.' 
-            ); 
-        END IF; 
+        -- Si no existe registro en RENDTALL, lo crea.
+            IF SQL%ROWCOUNT = 0 THEN 
+                INSERT INTO RENDTALL (
+                    RETATALL, 
+                    RETAANCH, 
+                    RETAPESO, 
+                    RETAROLL, 
+                    RETAREND, 
+                    RETAMETR, 
+                    RETAFEGE, 
+                    RETAUSUA
+                ) VALUES (
+                    cod_talla, 
+                    ancho_rendtall, 
+                    peso_rendtall, 
+                    rollo_rendtall, 
+                    rendimiento_rendtall, 
+                    metros_rendtall, 
+                    SYSDATE, 
+                    usuario_rendtall
+                );
+            END IF;
  
         -- Confirma la actualización de TALLA y RENDTALL.
         COMMIT; 

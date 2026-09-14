@@ -57,7 +57,7 @@ SELECT
     m.MOLIRPM,
     m.MOLIPERI
 FROM MOLINETE m
-WHERE m.MOLCCODI = 99;
+WHERE m.MOLICODI = 99;
 
 
 --=============================================================================
@@ -147,7 +147,7 @@ SELECT
     m.MOLIRPM,
     m.MOLIPERI
 FROM MOLINETE m
-WHERE m.MOLCCODI = 99;
+WHERE m.MOLICODI = 99;
 
 
 --=============================================================================
