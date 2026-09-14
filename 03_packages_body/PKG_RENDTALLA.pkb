@@ -129,7 +129,7 @@ PROCEDURE actualizarRendTalla ( cod_talla NUMBER, nom_talla VARCHAR2, esta_talla
         IF SQL%ROWCOUNT = 0 THEN 
             ROLLBACK; 
             RAISE_APPLICATION_ERROR( 
-                -20006, 
+                -20005, 
                 'La talla no tiene información de rendimiento asociada.' 
             ); 
         END IF; 
@@ -212,7 +212,7 @@ PROCEDURE insertarRendTalla (cod_talla number, nom_talla varchar2, esta_talla va
         -- Validación según precisión de RETAREND NUMBER(2,1)
         IF rendimiento_rendtall > 9.9 THEN
             RAISE_APPLICATION_ERROR(
-                -20007,
+                -20006,
                 'El rendimiento calculado supera el máximo permitido de 9.9.'
             );
         END IF;
@@ -220,7 +220,7 @@ PROCEDURE insertarRendTalla (cod_talla number, nom_talla varchar2, esta_talla va
         -- Validación según precisión de RETAMETR NUMBER(4,1)
         IF metros_rendtall > 999.9 THEN
             RAISE_APPLICATION_ERROR(
-                -20008,
+                -20007,
                 'Los metros por rollo calculados superan el máximo permitido de 999.9.'
             );
         END IF;

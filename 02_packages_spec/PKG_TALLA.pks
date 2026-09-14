@@ -5,13 +5,13 @@ as
  
 
 --=============================================================================
--- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_TALLA` para la gestión de TALLA y su RENDTALL asociado.
+-- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_TALLA` para la gestión de TALLA.
 --
 -- Autor: JUAN ANDRES SERNA CASTRO
 -- Fecha_creacion: 09/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Gestionar las operaciones de consulta, inserción, actualización y eliminación de TALLA y su información de RENDTALL asociada.
+-- Gestionar las operaciones de consulta, inserción, actualización y activación de TALLA.
 --
 -- Historial_modificaciones:
 --
