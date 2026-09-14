@@ -27,7 +27,8 @@ begin
     OPEN cursor FOR 
         SELECT 
             USUACODI, 
-            USUANOMB, 
+            USUANOMB,
+            USUAPASS, 
             USUAESTA
         FROM USUARIO
         WHERE (cod_usuario IS NULL OR USUACODI = cod_usuario) 
