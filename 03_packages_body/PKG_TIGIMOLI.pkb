@@ -200,21 +200,19 @@ PROCEDURE insertarTigimoli (
     cod_moli NUMBER,
     cod_talla NUMBER,
     rollos NUMBER,
-    usuario NUMBER
+    usuario NUMBER,
+    fecha_generacion DATE
 ) IS
 
     metros_rollo NUMBER;
     total_metros NUMBER;
-    tiempo_giro  NUMBER;
+    tiempo_giro NUMBER;
 
-    rpm          NUMBER;
-    perimetro    NUMBER;
-
-    cantidad_rendtall NUMBER;
+    rpm NUMBER;
+    perimetro NUMBER;
 
 BEGIN
 
-    -- Validar cantidad de rollos
     IF rollos IS NULL OR rollos <= 0 THEN
         RAISE_APPLICATION_ERROR(
             -20013,
@@ -222,38 +220,43 @@ BEGIN
         );
     END IF;
 
-    -- Validar que la talla tenga rendimiento
-    SELECT COUNT(*)
-    INTO cantidad_rendtall
-    FROM RENDTALL
-    WHERE RETATALL = cod_talla;
 
-    IF cantidad_rendtall = 0 THEN
-        RAISE_APPLICATION_ERROR(
-            -20005,
-            'La talla no tiene rendimiento asociado.'
-        );
-    END IF;
+    BEGIN
 
-    -- Obtener metros por rollo
-    SELECT RETAMETR
-    INTO metros_rollo
-    FROM RENDTALL
-    WHERE RETATALL = cod_talla;
+        SELECT RETAMETR
+        INTO metros_rollo
+        FROM RENDTALL
+        WHERE RETATALL = cod_talla;
 
-    -- Obtener RPM y perímetro del molinete
-    SELECT MOLIRPM, MOLIPERI
-    INTO rpm, perimetro
+    EXCEPTION
+
+        WHEN NO_DATA_FOUND THEN
+            RAISE_APPLICATION_ERROR(
+                -20005,
+                'La talla no tiene rendimiento asociado.'
+            );
+
+    END;
+
+
+    SELECT
+        MOLIRPM,
+        MOLIPERI
+    INTO
+        rpm,
+        perimetro
     FROM MOLINETE
     WHERE MOLICODI = cod_moli;
 
-    -- Calcular cantidad total de metros
-    total_metros := metros_rollo * rollos;
 
-    -- Calcular tiempo de giro
-    tiempo_giro := total_metros / ((rpm * perimetro) / 100);
+    total_metros :=
+        metros_rollo * rollos;
 
-    -- Insertar registro
+    tiempo_giro :=
+        total_metros /
+        ((rpm * perimetro) / 100);
+
+
     INSERT INTO TIGIMOLI (
         TGMOMOLI,
         TGMOTALL,
@@ -271,16 +274,72 @@ BEGIN
         metros_rollo,
         total_metros,
         tiempo_giro,
-        SYSDATE,
+        fecha_generacion,
         usuario
     );
 
+END;
+
+---------------------------------------------------------------------------
+-- REGISTRAR CALCULO
+---------------------------------------------------------------------------
+PROCEDURE registrarCalculoTigimoli (
+    codigos_molinetes t_lista_numeros,
+    codigos_tallas t_lista_numeros,
+    cantidades_rollos t_lista_numeros,
+    usuario NUMBER
+) IS
+
+    fecha_generacion DATE;
+
+BEGIN
+
+    IF codigos_molinetes.COUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20015,
+            'El cálculo debe contener al menos un registro.'
+        );
+    END IF;
+
+
+    IF codigos_molinetes.COUNT <> codigos_tallas.COUNT
+       OR codigos_molinetes.COUNT <> cantidades_rollos.COUNT
+    THEN
+
+        RAISE_APPLICATION_ERROR(
+            -20014,
+            'Los datos del cálculo no son consistentes.'
+        );
+
+    END IF;
+
+
+    fecha_generacion := SYSDATE;
+
+
+    FOR i IN 1 .. codigos_molinetes.COUNT
+    LOOP
+
+        insertarTigimoli(
+            cod_moli => codigos_molinetes(i),
+            cod_talla => codigos_tallas(i),
+            rollos => cantidades_rollos(i),
+            usuario => usuario,
+            fecha_generacion => fecha_generacion
+        );
+
+    END LOOP;
+
+
     COMMIT;
 
+
 EXCEPTION
+
     WHEN OTHERS THEN
         ROLLBACK;
         RAISE;
+
 END;
 
 END PKG_TIGIMOLI;

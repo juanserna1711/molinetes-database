@@ -20,7 +20,12 @@ AS
 -- Fecha:
 -- Descripcion:
 --=============================================================================
+---------------------------------------------------------------------------
+-- TIPOS
+---------------------------------------------------------------------------
 
+TYPE t_lista_numeros IS TABLE OF NUMBER
+    INDEX BY BINARY_INTEGER;
 
 ---------------------------------------------------------------------------
 -- SELECTS
@@ -47,10 +52,11 @@ PROCEDURE consultaDetalleTigimoli (
 -- INSERTS
 ---------------------------------------------------------------------------
 
-PROCEDURE insertarTigimoli (
-    cod_moli NUMBER,
-    cod_talla NUMBER,
-    rollos NUMBER,
+
+PROCEDURE registrarCalculoTigimoli (
+    codigos_molinetes t_lista_numeros,
+    codigos_tallas t_lista_numeros,
+    cantidades_rollos t_lista_numeros,
     usuario NUMBER
 );
 
