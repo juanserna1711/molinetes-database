@@ -111,6 +111,7 @@ PROCEDURE desactivarTalla ( cod_talla NUMBER) is
  
 PROCEDURE eliminarTalla (cod_talla number) is 
     v_registros_rend NUMBER := 0;
+    v_registros_tigimoli NUMBER := 0;
  
     begin
 
@@ -126,6 +127,21 @@ PROCEDURE eliminarTalla (cod_talla number) is
                 'No se puede eliminar la talla porque tiene registros de rendimiento asociados.'
             );
         
+        END IF;
+
+        -- Validar si existen cálculos TIGIMOLI asociados a la talla
+        SELECT COUNT(*)
+        INTO v_registros_tigimoli
+        FROM TIGIMOLI
+        WHERE TGMOTALL = cod_talla;
+
+        IF v_registros_tigimoli > 0 THEN
+
+            RAISE_APPLICATION_ERROR(
+                -20016,
+                'No se puede eliminar la talla porque tiene cálculos de tiempo de giro asociados.'
+            );
+
         END IF;
  
         DELETE 

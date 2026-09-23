@@ -1,6 +1,6 @@
 CREATE OR REPLACE PACKAGE BODY PKG_TIGIMOLI
 
-AS
+as
 
 
 --=============================================================================
@@ -24,30 +24,19 @@ AS
 ---------------------------------------------------------------------------
 -- CONSULTA
 ---------------------------------------------------------------------------
-
-PROCEDURE consultaTigimoli (
-    cod_moli NUMBER,
-    nom_moli VARCHAR2,
-    fecha_generacion DATE,
-    pagina NUMBER,
-    registros_pagina NUMBER,
-    total_registros OUT NUMBER,
-    cursor OUT SYS_REFCURSOR
-) IS
-
+PROCEDURE consultaTigimoli (codigos_molinetes VARCHAR2, fecha_inicio DATE, fecha_fin DATE, pagina NUMBER, registros_pagina NUMBER, total_registros OUT NUMBER, cursor OUT SYS_REFCURSOR ) is
     v_pagina NUMBER;
     v_registros_pagina NUMBER;
+begin
 
-BEGIN
-
-
-    -- Define valores por defecto para la paginación.
+    /*
+      Define los valores utilizados para la paginación.
+    */
     IF pagina IS NULL OR pagina < 1 THEN
         v_pagina := 1;
     ELSE
         v_pagina := TRUNC(pagina);
     END IF;
-
 
     IF registros_pagina IS NULL OR registros_pagina < 1 THEN
         v_registros_pagina := 10;
@@ -56,7 +45,10 @@ BEGIN
     END IF;
 
 
-    -- Consulta la cantidad total de registros.
+    /*
+      Consulta la cantidad total de registros agrupados
+      por molinete y fecha de generación.
+    */
     SELECT COUNT(*)
     INTO total_registros
     FROM (
@@ -64,31 +56,32 @@ BEGIN
             g.TGMOMOLI,
             g.TGMOFEGE
         FROM TIGIMOLI g
-        LEFT JOIN MOLINETE m
-            ON g.TGMOMOLI = m.MOLICODI
-        WHERE (cod_moli IS NULL OR
-               g.TGMOMOLI = cod_moli)
-
-          AND (nom_moli IS NULL OR
-               LOWER(m.MOLINOMB) LIKE '%' ||
-               LOWER(nom_moli) || '%')
-
-          AND (fecha_generacion IS NULL OR
-               (
-                   g.TGMOFEGE >= TRUNC(fecha_generacion)
-                   AND g.TGMOFEGE < TRUNC(fecha_generacion) + 1
-               ))
-
+        WHERE (
+            codigos_molinetes IS NULL
+            OR INSTR(
+                ',' || codigos_molinetes || ',',
+                ',' || TO_CHAR(g.TGMOMOLI) || ','
+            ) > 0
+        )
+        AND (
+            fecha_inicio IS NULL
+            OR g.TGMOFEGE >= TRUNC(fecha_inicio)
+        )
+        AND (
+            fecha_fin IS NULL
+            OR g.TGMOFEGE < TRUNC(fecha_fin) + 1
+        )
         GROUP BY
             g.TGMOMOLI,
             g.TGMOFEGE
     );
 
 
-    -- Consulta TIGIMOLI agrupada por molinete
-    -- y fecha de generación.
+    /*
+      Consulta el historial TIGIMOLI aplicando los filtros
+      seleccionados y la paginación.
+    */
     OPEN cursor FOR
-
         SELECT
             codigo_moli,
             nombre_molinete,
@@ -98,12 +91,9 @@ BEGIN
             total_metros,
             tiempo_giro
         FROM (
-
             SELECT
                 g.TGMOMOLI AS codigo_moli,
-
                 m.MOLINOMB AS nombre_molinete,
-
                 g.TGMOFEGE AS fecha_generacion,
 
                 COUNT(DISTINCT g.TGMOTALL)
@@ -129,24 +119,28 @@ BEGIN
             LEFT JOIN MOLINETE m
                 ON g.TGMOMOLI = m.MOLICODI
 
-            WHERE (cod_moli IS NULL OR
-                   g.TGMOMOLI = cod_moli)
+            WHERE (
+                codigos_molinetes IS NULL
+                OR INSTR(
+                    ',' || codigos_molinetes || ',',
+                    ',' || TO_CHAR(g.TGMOMOLI) || ','
+                ) > 0
+            )
 
-              AND (nom_moli IS NULL OR
-                   LOWER(m.MOLINOMB) LIKE '%' ||
-                   LOWER(nom_moli) || '%')
+            AND (
+                fecha_inicio IS NULL
+                OR g.TGMOFEGE >= TRUNC(fecha_inicio)
+            )
 
-              AND (fecha_generacion IS NULL OR
-                   (
-                       g.TGMOFEGE >= TRUNC(fecha_generacion)
-                       AND g.TGMOFEGE < TRUNC(fecha_generacion) + 1
-                   ))
+            AND (
+                fecha_fin IS NULL
+                OR g.TGMOFEGE < TRUNC(fecha_fin) + 1
+            )
 
             GROUP BY
                 g.TGMOMOLI,
                 m.MOLINOMB,
                 g.TGMOFEGE
-
         )
 
         WHERE numero_fila BETWEEN
@@ -158,20 +152,15 @@ BEGIN
             fecha_generacion DESC,
             codigo_moli ASC;
 
-
-END;
+end;
 
 ---------------------------------------------------------------------------
 -- CONSULTA DETALLE
 ---------------------------------------------------------------------------
 
-PROCEDURE consultaDetalleTigimoli (
-    cod_moli NUMBER,
-    fecha_generacion DATE,
-    cursor OUT SYS_REFCURSOR
-) IS
+PROCEDURE consultaDetalleTigimoli ( cod_moli NUMBER, fecha_generacion DATE, cursor OUT SYS_REFCURSOR ) is
 
-BEGIN
+begin
 
     -- Consulta las tallas asociadas al molinete
     -- y fecha de generación.
@@ -191,18 +180,12 @@ BEGIN
         ORDER BY
             g.TGMOTALL ASC;
 
-END;
+end;
 
 ---------------------------------------------------------------------------
 -- INSERTAR
 ---------------------------------------------------------------------------
-PROCEDURE insertarTigimoli (
-    cod_moli NUMBER,
-    cod_talla NUMBER,
-    rollos NUMBER,
-    usuario NUMBER,
-    fecha_generacion DATE
-) IS
+PROCEDURE insertarTigimoli ( cod_moli NUMBER, cod_talla NUMBER, rollos NUMBER, usuario NUMBER, fecha_generacion DATE ) is
 
     metros_rollo NUMBER;
     total_metros NUMBER;
@@ -211,7 +194,7 @@ PROCEDURE insertarTigimoli (
     rpm NUMBER;
     perimetro NUMBER;
 
-BEGIN
+begin
 
     IF rollos IS NULL OR rollos <= 0 THEN
         RAISE_APPLICATION_ERROR(
@@ -249,50 +232,25 @@ BEGIN
     WHERE MOLICODI = cod_moli;
 
 
-    total_metros :=
-        metros_rollo * rollos;
+    total_metros := metros_rollo * rollos;
 
-    tiempo_giro :=
-        total_metros /
-        ((rpm * perimetro) / 100);
+    tiempo_giro := total_metros / ((rpm * perimetro) / 100);
 
 
-    INSERT INTO TIGIMOLI (
-        TGMOMOLI,
-        TGMOTALL,
-        TGMOCARO,
-        TGMOCAME,
-        TGMOCATM,
-        TGMOTIGI,
-        TGMOFEGE,
-        TGMOUSUA
-    )
-    VALUES (
-        cod_moli,
-        cod_talla,
-        rollos,
-        metros_rollo,
-        total_metros,
-        tiempo_giro,
-        fecha_generacion,
-        usuario
-    );
+    INSERT INTO TIGIMOLI ( TGMOMOLI, TGMOTALL, TGMOCARO, TGMOCAME, TGMOCATM, TGMOTIGI, TGMOFEGE, TGMOUSUA )
+    
+    VALUES ( cod_moli, cod_talla, rollos, metros_rollo, total_metros, tiempo_giro, fecha_generacion, usuario );
 
-END;
+end;
 
 ---------------------------------------------------------------------------
 -- REGISTRAR CALCULO
 ---------------------------------------------------------------------------
-PROCEDURE registrarCalculoTigimoli (
-    codigos_molinetes t_lista_numeros,
-    codigos_tallas t_lista_numeros,
-    cantidades_rollos t_lista_numeros,
-    usuario NUMBER
-) IS
+PROCEDURE registrarCalculoTigimoli ( codigos_molinetes t_lista_numeros, codigos_tallas t_lista_numeros, cantidades_rollos t_lista_numeros, usuario NUMBER ) is
 
     fecha_generacion DATE;
 
-BEGIN
+begin
 
     IF codigos_molinetes.COUNT = 0 THEN
         RAISE_APPLICATION_ERROR(
@@ -320,13 +278,7 @@ BEGIN
     FOR i IN 1 .. codigos_molinetes.COUNT
     LOOP
 
-        insertarTigimoli(
-            cod_moli => codigos_molinetes(i),
-            cod_talla => codigos_tallas(i),
-            rollos => cantidades_rollos(i),
-            usuario => usuario,
-            fecha_generacion => fecha_generacion
-        );
+        insertarTigimoli( cod_moli => codigos_molinetes(i), cod_talla => codigos_tallas(i), rollos => cantidades_rollos(i), usuario => usuario, fecha_generacion => fecha_generacion );
 
     END LOOP;
 
@@ -340,6 +292,6 @@ EXCEPTION
         ROLLBACK;
         RAISE;
 
-END;
+end;
 
-END PKG_TIGIMOLI;
+end PKG_TIGIMOLI;

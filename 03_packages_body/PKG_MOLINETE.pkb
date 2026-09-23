@@ -85,15 +85,31 @@ PROCEDURE actualizarMolinete ( cod_molinete NUMBER, nom_molinete VARCHAR2, rpm_m
     end; 
  
  
-PROCEDURE eliminarMolinete (cod_molinete number) is 
+PROCEDURE eliminarMolinete (cod_molinete number) is
+    v_registros_tigimoli NUMBER := 0; 
  
     begin
+
+        -- Validar si existen cálculos TIGIMOLI asociados al molinete
+        SELECT COUNT(*)
+        INTO v_registros_tigimoli
+        FROM TIGIMOLI
+        WHERE TGMOMOLI = cod_molinete;
+
+        IF v_registros_tigimoli > 0 THEN
+
+            RAISE_APPLICATION_ERROR(
+                -20017,
+                'No se puede eliminar el molinete porque tiene cálculos de tiempo de giro asociados.'
+            );
+
+        END IF;
  
         DELETE 
  
         FROM MOLINETE 
  
-        WHERE MOLICODI = cod_molinete; 
+        WHERE MOLICODI = cod_molinete;
  
         -- Valida que el MOLINETE haya existido antes de confirmar la eliminación.
         IF SQL%ROWCOUNT = 0 THEN 

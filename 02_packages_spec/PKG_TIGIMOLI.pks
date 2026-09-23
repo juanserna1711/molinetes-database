@@ -33,9 +33,9 @@ TYPE t_lista_numeros IS TABLE OF NUMBER
 
 
 PROCEDURE consultaTigimoli (
-    cod_moli NUMBER,
-    nom_moli VARCHAR2,
-    fecha_generacion DATE,
+    codigos_molinetes VARCHAR2,
+    fecha_inicio DATE,
+    fecha_fin DATE,
     pagina NUMBER,
     registros_pagina NUMBER,
     total_registros OUT NUMBER,
