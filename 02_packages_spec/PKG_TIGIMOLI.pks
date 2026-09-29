@@ -11,15 +11,21 @@ AS
 -- Fecha_creacion: 18/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Gestionar las operaciones de consulta e inserción de TIGIMOLI.
+-- Gestionar el registro de los cálculos de giro por molinete y talla,
+-- almacenando el resultado en TIGIMOLI y generando la respectiva
+-- Orden de Trabajo en ORDEPROD.
 --
 --
 -- Historial_modificaciones:
 --
--- Autor:
--- Fecha:
+-- Autor: JUAN ANDRES SERNA CASTRO
+-- Fecha: 25/Septiembre/2026
 -- Descripcion:
+-- Se ajusta el registro del cálculo para almacenar RPM, tipo de hilaza
+-- y generar la Orden de Trabajo asociada en ORDEPROD.
 --=============================================================================
+
+
 ---------------------------------------------------------------------------
 -- TIPOS
 ---------------------------------------------------------------------------
@@ -27,38 +33,21 @@ AS
 TYPE t_lista_numeros IS TABLE OF NUMBER
     INDEX BY BINARY_INTEGER;
 
----------------------------------------------------------------------------
--- SELECTS
----------------------------------------------------------------------------
-
-
-PROCEDURE consultaTigimoli (
-    codigos_molinetes VARCHAR2,
-    fecha_inicio DATE,
-    fecha_fin DATE,
-    pagina NUMBER,
-    registros_pagina NUMBER,
-    total_registros OUT NUMBER,
-    cursor OUT SYS_REFCURSOR
-);
-
-PROCEDURE consultaDetalleTigimoli (
-    cod_moli NUMBER,
-    fecha_generacion DATE,
-    cursor OUT SYS_REFCURSOR
-);
 
 ---------------------------------------------------------------------------
 -- INSERTS
 ---------------------------------------------------------------------------
 
-
 PROCEDURE registrarCalculoTigimoli (
     codigos_molinetes t_lista_numeros,
     codigos_tallas t_lista_numeros,
     cantidades_rollos t_lista_numeros,
-    usuario NUMBER
+    rpms_molinetes t_lista_numeros,
+    cod_tipo_hilaza NUMBER,
+    usuario NUMBER,
+    codigo_orden OUT NUMBER
 );
 
 
 END PKG_TIGIMOLI;
+/

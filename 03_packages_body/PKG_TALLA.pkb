@@ -32,8 +32,7 @@ begin
             TALLESTA
         FROM TALLA
         WHERE (cod_talla IS NULL OR TALLCODI = cod_talla) 
-          AND (nom_talla IS NULL OR 
-               LOWER(TALLNOMB) LIKE '%' || LOWER(nom_talla) || '%') 
+          AND (nom_talla IS NULL OR LOWER(TALLNOMB) LIKE '%' || LOWER(nom_talla) || '%') 
           AND (esta_talla IS NULL OR TALLESTA = esta_talla) 
         ORDER BY TALLCODI ASC; 
  
