@@ -1,14 +1,15 @@
-CREATE OR REPLACE package PKG_MOLINETE
+CREATE OR REPLACE package PKG_MODULO
+
 as
 
 --=============================================================================
--- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_MOLINETE` para la gestión de los molinetes.
+-- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_MODULO` para la gestión de los modulos de MoliPlus.
 --
 -- Autor: JUAN ANDRES SERNA CASTRO
--- Fecha_creacion: 13/Septiembre/2026
+-- Fecha_creacion: 30/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Declarar la interfaz pública de consulta, inserción, actualización y eliminación de los molinetes.
+-- Declarar la interfaz pública de consulta, inserción, actualización y eliminación de los modulos.
 --
 -- Historial_modificaciones:
 --
@@ -24,14 +25,14 @@ SELECTS
 */
 
 /*
-Consulta de molinetes con parámetros de código y nombre; el resultado se entrega en el cursor de salida.
+Consulta de modulos con parámetros de código, nombre y zona; devuelve un cursor de salida.
 */
-PROCEDURE consultaMolinete (
-    cod_molinete NUMBER,
-    nom_molinete VARCHAR2,
+PROCEDURE consultamodulo (
+    cod_modulo NUMBER,
+    nom_modulo VARCHAR2,
+    zona_modulo VARCHAR2,
     cursor out sys_refcursor
 );
-
 /*
 -------------------------------------------------------------------------
 UPDATES
@@ -39,13 +40,14 @@ UPDATES
 */
 
 /*
-Actualización del molinete por código con los valores nom_molinete, rpm_molinete y peri_molinete.
+Actualización del archivo, menu, nombre, zona y orden del modulo identificado por su código.
 */
-PROCEDURE actualizarMolinete (
-    cod_molinete NUMBER,
-    nom_molinete VARCHAR2,
-    rpm_molinete NUMBER,
-    peri_molinete NUMBER
+PROCEDURE actualizarModulo (
+    cod_modulo NUMBER,
+    arch_modulo VARCHAR2, 
+    nom_modulo VARCHAR2,
+    zona_modulo VARCHAR2,
+    orde_modulo NUMBER
 );
 
 /*
@@ -55,10 +57,10 @@ DELETES
 */
 
 /*
-Eliminación del molinete identificado por su código.
+Eliminación del modulo identificado por cod_modulo.
 */
-PROCEDURE eliminarMolinete (
-    cod_molinete NUMBER
+PROCEDURE eliminarmodulo (
+    cod_modulo NUMBER
 );
 
 /*
@@ -68,19 +70,20 @@ INSERTS
 */
 
 /*
-Inserción de un molinete con los valores cod_molinete, nom_molinete, rpm_molinete y peri_molinete.
+Inserción de un modulo con su código, nombre, contraseña y estado.
 */
-PROCEDURE insertarMolinete (
-    cod_molinete NUMBER,
-    nom_molinete VARCHAR2,
-    rpm_molinete NUMBER,
-    peri_molinete NUMBER
+PROCEDURE insertarmodulo (
+    cod_modulo NUMBER,
+    arch_modulo VARCHAR2,
+    nom_modulo VARCHAR2,
+    zona_modulo VARCHAR2,
+    orde_modulo NUMBER
 );
 
 /*
 ---------------------------------------------------------------------------------------------------------------
 */
 
-end PKG_MOLINETE;
+end PKG_modulo;
 
 /

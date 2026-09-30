@@ -1,16 +1,15 @@
-CREATE OR REPLACE package body PKG_USUARIO
+CREATE OR REPLACE package body PKG_MODULO
 
 as
 
 --=============================================================================
--- Nombre responsabilidad: Implementar el cuerpo del paquete PKG_USUARIO.
+-- Nombre responsabilidad: Implementar el cuerpo del paquete PKG_MODULO.
 --
 -- Autor: JUAN ANDRES SERNA CASTRO
 -- Fecha_creacion: 13/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Implementar las operaciones de consulta, actualización, activación, desactivación,
--- eliminación e inserción de USUARIO.
+-- Implementar las operaciones de consulta, actualización, eliminación e inserción de MODULO.
 -- Las escrituras confirman la transacción pendiente de la sesión al completarse;
 -- no incluyen un manejador local de excepciones.
 --
@@ -23,31 +22,33 @@ as
 --=============================================================================
 
 /*
-Devuelve código, nombre, password y estado en un cursor OUT ordenado por código.
+Devuelve código, nombre, y estado en un cursor OUT ordenado por código.
 Los filtros son opcionales; el nombre se busca parcialmente sin distinguir mayúsculas.
 */
-PROCEDURE consultaUsuario ( cod_usuario NUMBER, nom_usuario VARCHAR2, esta_usuario VARCHAR2, cursor OUT SYS_REFCURSOR ) is
+PROCEDURE consultaModulo ( cod_modulo NUMBER, nom_modulo VARCHAR2, zona_modulo VARCHAR2, cursor OUT SYS_REFCURSOR ) is
 
 begin
 
     OPEN cursor FOR
         SELECT
-            USUACODI,
-            USUANOMB,
-            USUAPASS,
-            USUAESTA
-        FROM USUARIO
-        WHERE (cod_usuario IS NULL OR USUACODI = cod_usuario)
-          AND (nom_usuario IS NULL OR LOWER(USUANOMB) LIKE '%' || LOWER(nom_usuario) || '%')
-          AND (esta_usuario IS NULL OR USUAESTA = esta_usuario)
-        ORDER BY USUACODI ASC;
+            MODUCODI,
+            MODUARCH,
+            MODOMENU,
+            MODUNOMB,
+            MODUZONA,
+            MODUORDE
+        FROM MODULO
+        WHERE (cod_modulo IS NULL OR MODUCODI = cod_modulo)
+          AND (nom_modulo IS NULL OR LOWER(MODUNOMB) LIKE '%' || LOWER(nom_modulo) || '%')
+          AND (zona_modulo IS NULL OR LOWER(MODUZONA) LIKE '%' || LOWER(zona_modulo) || '%')
+        ORDER BY MODUCODI ASC;
 
 end;
 
 /*
 Sustituye nombre, valor de contraseña y estado del usuario identificado por su código.
 */
-PROCEDURE actualizarUsuario ( cod_usuario NUMBER, nom_usuario VARCHAR2, pass_usuario VARCHAR2, esta_usuario VARCHAR2) is
+PROCEDURE actualizarModulo (cod_modulo NUMBER, arch_modulo VARCHAR2, menu_modulo NUMBER, nom_modulo VARCHAR2, zona_modulo VARCHAR2, orde_modulo NUMBER) is
 
     begin
 

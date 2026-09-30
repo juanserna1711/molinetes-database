@@ -2,8 +2,6 @@ CREATE OR REPLACE package PKG_USUARIO
 
 as
 
- 
-
 --=============================================================================
 -- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_USUARIO` para la gestión del usuario.
 --
@@ -11,7 +9,8 @@ as
 -- Fecha_creacion: 13/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Gestionar las operaciones de consulta, inserción, actualización, activación, desactivación y eliminación del usuario.
+-- Declarar la interfaz pública de consulta, inserción, actualización,
+-- activación, desactivación y eliminación del usuario.
 --
 -- Historial_modificaciones:
 --
@@ -20,23 +19,30 @@ as
 -- Descripcion:
 --=============================================================================
 
----------------------------------------------------------------------------
--- SELECTS
----------------------------------------------------------------------------
+/*
+-------------------------------------------------------------------------
+SELECTS
+-------------------------------------------------------------------------
+*/
 
-
--- Consultar USUARIO
+/*
+Consulta de usuarios con parámetros de código, nombre y estado; devuelve un cursor de salida.
+*/
 PROCEDURE consultaUsuario (
-    cod_usuario NUMBER,  
-    nom_usuario VARCHAR2, 
-    esta_usuario VARCHAR2, 
+    cod_usuario NUMBER,
+    nom_usuario VARCHAR2,
+    esta_usuario VARCHAR2,
     cursor out sys_refcursor
 );
----------------------------------------------------------------------------
--- UPDATES
----------------------------------------------------------------------------
+/*
+-------------------------------------------------------------------------
+UPDATES
+-------------------------------------------------------------------------
+*/
 
--- Actualización de USUARIO
+/*
+Actualización del nombre, contraseña y estado del usuario identificado por su código.
+*/
 PROCEDURE actualizarUsuario (
     cod_usuario NUMBER,
     nom_usuario VARCHAR2,
@@ -44,32 +50,42 @@ PROCEDURE actualizarUsuario (
     esta_usuario VARCHAR2
 );
 
-
--- Activar USUARIO
+/*
+Activación del usuario identificado por cod_usuario.
+*/
 PROCEDURE activarUsuario (
     cod_usuario NUMBER
 );
 
-
--- Desactivar USUARIO
+/*
+Desactivación del usuario identificado por cod_usuario.
+*/
 PROCEDURE desactivarUsuario (
     cod_usuario NUMBER
 );
 
----------------------------------------------------------------------------
--- DELETES
----------------------------------------------------------------------------
+/*
+-------------------------------------------------------------------------
+DELETES
+-------------------------------------------------------------------------
+*/
 
--- Eliminación de USUARIO
+/*
+Eliminación del usuario identificado por cod_usuario.
+*/
 PROCEDURE eliminarUsuario (
     cod_usuario NUMBER
 );
 
----------------------------------------------------------------------------
--- INSERTS
----------------------------------------------------------------------------
+/*
+-------------------------------------------------------------------------
+INSERTS
+-------------------------------------------------------------------------
+*/
 
---Insertar USUARIO
+/*
+Inserción de un usuario con su código, nombre, contraseña y estado.
+*/
 PROCEDURE insertarUsuario (
     cod_usuario NUMBER,
     nom_usuario VARCHAR2,
@@ -77,7 +93,9 @@ PROCEDURE insertarUsuario (
     esta_usuario VARCHAR2
 );
 
------------------------------------------------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------------------------------------------
+*/
 
 end PKG_USUARIO;
 

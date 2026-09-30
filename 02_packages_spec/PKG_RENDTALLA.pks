@@ -2,8 +2,6 @@ CREATE OR REPLACE package PKG_RENDTALLA
 
 as
 
- 
-
 --=============================================================================
 -- Nombre responsabilidad: Crear la especificación (.pks) del paquete `PKG_RENDTALLA` para la gestión de RENDTALL.
 --
@@ -11,7 +9,7 @@ as
 -- Fecha_creacion: 09/Septiembre/2026
 --
 -- Descripcion responsabilidad:
--- Gestionar las operaciones de consulta, inserción, actualización y eliminación de RENDTALL.
+-- Declarar la interfaz pública de las operaciones de consulta, inserción, actualización y eliminación de RENDTALL.
 --
 -- Historial_modificaciones:
 --
@@ -20,23 +18,29 @@ as
 -- Descripcion:
 --=============================================================================
 
----------------------------------------------------------------------------
--- SELECTS
----------------------------------------------------------------------------
+/*
+-------------------------------------------------------------------------
+SELECTS
+-------------------------------------------------------------------------
+*/
 
-
--- Consultar TALLA y su RENDIMIENTO asociado
+/*
+Consulta de tallas y su rendimiento asociado con parámetros de nombre.
+Entrega el resultado mediante el cursor de salida.
+*/
 PROCEDURE consultaRendTalla (
-    cod_talla NUMBER,  
-    nom_talla VARCHAR2, 
-    esta_talla VARCHAR2, 
+    nom_talla VARCHAR2,
     cursor out sys_refcursor
 );
----------------------------------------------------------------------------
--- UPDATES
----------------------------------------------------------------------------
+/*
+-------------------------------------------------------------------------
+UPDATES
+-------------------------------------------------------------------------
+*/
 
--- Actualización de TALLA y su RENDIMIENTO asociado
+/*
+Actualización del rendimiento asociado a cod_talla con ancho, peso, rollo y usuario.
+*/
 PROCEDURE actualizarRendTalla (
     cod_talla NUMBER,
     ancho_rendtall NUMBER,
@@ -45,21 +49,28 @@ PROCEDURE actualizarRendTalla (
     usuario_rendtall NUMBER
 );
 
+/*
+-------------------------------------------------------------------------
+DELETES
+-------------------------------------------------------------------------
+*/
 
----------------------------------------------------------------------------
--- DELETES
----------------------------------------------------------------------------
-
--- Eliminación de TALLA y su RENDIMIENTO asociado
+/*
+Operación de eliminación de rendimiento con cod_talla como identificador.
+*/
 PROCEDURE eliminarRendTalla (
     cod_talla NUMBER
 );
 
----------------------------------------------------------------------------
--- INSERTS
----------------------------------------------------------------------------
+/*
+-------------------------------------------------------------------------
+INSERTS
+-------------------------------------------------------------------------
+*/
 
---Insertar TALLA y su RENDIMIENTO asociado
+/*
+Inserción del rendimiento asociado a cod_talla con ancho, peso, rollo y usuario.
+*/
 PROCEDURE insertarRendTalla (
     cod_talla NUMBER,
     ancho_rendtall NUMBER,
@@ -68,7 +79,9 @@ PROCEDURE insertarRendTalla (
     usuario_rendtall NUMBER
 );
 
------------------------------------------------------------------------------------------------------------------
+/*
+---------------------------------------------------------------------------------------------------------------
+*/
 
 end PKG_RENDTALLA;
 
