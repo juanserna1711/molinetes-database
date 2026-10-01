@@ -20,32 +20,24 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-SELECTS
+--SELECTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Consulta de promedios con parámetros de tipo de hilaza y talla.
-Entrega la información asociada mediante el cursor de salida.
-*/
+--Consulta de promedios con parámetros de tipo de hilaza y talla.
+
 PROCEDURE consultaTiHiProm (
     cod_tipo_hilaza NUMBER,
     cod_talla NUMBER,
     cursor out sys_refcursor
 );
 
-/*
 -------------------------------------------------------------------------
-UPDATES
+--UPDATES
 -------------------------------------------------------------------------
-*/
 
-/*
-Actualización de peso y ancho para el tipo de hilaza y talla indicados,
-con usuario_tihiprom como parámetro de usuario.
-*/
+--Actualización de peso y ancho para el tipo de hilaza y talla indicados, con usuario_tihiprom como parámetro de usuario.
+
 PROCEDURE actualizarTiHiProm (
     cod_tipo_hilaza NUMBER,
     cod_talla NUMBER,
@@ -54,39 +46,30 @@ PROCEDURE actualizarTiHiProm (
     usuario_tihiprom NUMBER
 );
 
-/*
-Aplicación de la información del tipo de hilaza seleccionado en RENDTALL,
-con usuario_rendtall como parámetro de usuario.
-*/
+--Aplicación de la información del tipo de hilaza seleccionado en RENDTALL, con usuario_rendtall como parámetro de usuario.
+
 PROCEDURE aplicarTipoHilaza (
     cod_tipo_hilaza NUMBER,
     usuario_rendtall NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-DELETES
+--DELETES
 -------------------------------------------------------------------------
-*/
 
-/*
-Eliminación de la información identificada por cod_tipo_hilaza y cod_talla.
-*/
+--Eliminación de la información identificada por cod_tipo_hilaza y cod_talla.
+
 PROCEDURE eliminarTiHiProm (
     cod_tipo_hilaza NUMBER,
     cod_talla NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-INSERTS
+--INSERTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Inserción de peso y ancho asociados al tipo de hilaza y talla indicados,
-con usuario_tihiprom como parámetro de usuario.
-*/
+--Inserción de peso y ancho asociados al tipo de hilaza y talla indicados, con usuario_tihiprom como parámetro de usuario.
+
 PROCEDURE insertarTiHiProm (
     cod_tipo_hilaza NUMBER,
     cod_talla NUMBER,
@@ -95,9 +78,7 @@ PROCEDURE insertarTiHiProm (
     usuario_tihiprom NUMBER
 );
 
-/*
 ---------------------------------------------------------------------------------------------------------------
-*/
 
 end PKG_TIHIPROM;
 /

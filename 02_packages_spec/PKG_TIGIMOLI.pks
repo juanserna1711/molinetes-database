@@ -24,28 +24,21 @@ AS
 -- y generar la Orden de Trabajo asociada en ORDEPROD.
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-TIPOS
+--TIPOS
 -------------------------------------------------------------------------
-*/
 
-/*
-Colección asociativa de números utilizada por los parámetros de listas del registro.
-*/
+--Colección asociativa de números utilizada por los parámetros de listas del registro.
+
 TYPE t_lista_numeros IS TABLE OF NUMBER
     INDEX BY BINARY_INTEGER;
 
-/*
 -------------------------------------------------------------------------
-INSERTS
+--INSERTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Registro del cálculo con listas de molinetes, tallas, cantidades de rollos y RPM,
-junto con el tipo de hilaza y el usuario; devuelve el código de la orden generada.
-*/
+--Registro del cálculo con listas de molinetes, tallas, cantidades de rollos y RPM, junto con el tipo de hilaza y el usuario; devuelve el código de la orden generada.
+
 PROCEDURE registrarCalculoTigimoli (
     codigos_molinetes t_lista_numeros,
     codigos_tallas t_lista_numeros,

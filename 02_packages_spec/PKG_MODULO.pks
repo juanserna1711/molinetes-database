@@ -18,30 +18,25 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-SELECTS
+--SELECTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Consulta de modulos con parámetros de código, nombre y zona; devuelve un cursor de salida.
-*/
+--Consulta de modulos con parámetros de código, nombre y zona.
+
 PROCEDURE consultamodulo (
     cod_modulo NUMBER,
     nom_modulo VARCHAR2,
     zona_modulo VARCHAR2,
     cursor out sys_refcursor
 );
-/*
--------------------------------------------------------------------------
-UPDATES
--------------------------------------------------------------------------
-*/
 
-/*
-Actualización del archivo, menu, nombre, zona y orden del modulo identificado por su código.
-*/
+-------------------------------------------------------------------------
+--UPDATES
+-------------------------------------------------------------------------
+
+--Actualización del archivo, menu, nombre, zona y orden del modulo identificado por su código.
+
 PROCEDURE actualizarModulo (
     cod_modulo NUMBER,
     arch_modulo VARCHAR2, 
@@ -50,28 +45,22 @@ PROCEDURE actualizarModulo (
     orde_modulo NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-DELETES
+--DELETES
 -------------------------------------------------------------------------
-*/
 
-/*
-Eliminación del modulo identificado por cod_modulo.
-*/
+--Eliminación del modulo identificado por cod_modulo.
+
 PROCEDURE eliminarmodulo (
     cod_modulo NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-INSERTS
+--INSERTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Inserción de un modulo con su código, nombre, contraseña y estado.
-*/
+--Inserción de un modulo con su código, nombre, contraseña y estado.
+
 PROCEDURE insertarmodulo (
     cod_modulo NUMBER,
     arch_modulo VARCHAR2,
@@ -80,9 +69,7 @@ PROCEDURE insertarmodulo (
     orde_modulo NUMBER
 );
 
-/*
 ---------------------------------------------------------------------------------------------------------------
-*/
 
 end PKG_modulo;
 

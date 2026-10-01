@@ -20,29 +20,16 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
--------------------------------------------------------------------------
-PROCEDIMIENTOS PRIVADOS
--------------------------------------------------------------------------
-*/
-
-/*
-Procedimiento privado compartido por inserción, actualización y eliminación.
-Recalcula el promedio de la hilaza sin confirmar la transacción del llamador.
-*/
+-- Procedimiento privado compartido por inserción, actualización y eliminación.
 PROCEDURE recalcularPromedio (cod_tipo_hilaza NUMBER) is
 
-    /*
-    Promedio aritmético redondeado a entero que se replica en todas las filas de la hilaza.
-    */
+    -- Promedio aritmético redondeado a entero que se replica en todas las filas de la hilaza.
     promedio_tihiprom NUMBER;
 
     begin
-
-        /*
-        AVG considera los pesos no nulos de la hilaza; ROUND redondea sin decimales.
-        Sin pesos, el agregado devuelve NULL y el UPDATE alcanza las filas existentes.
-        */
+        
+        -- AVG considera los pesos no nulos de la hilaza; ROUND redondea sin decimales.
+        -- Sin pesos, el agregado devuelve NULL y el UPDATE alcanza las filas existentes.
         SELECT ROUND(AVG(TIHPPESO))
         INTO promedio_tihiprom
         FROM TIHIPROM
@@ -56,16 +43,6 @@ PROCEDURE recalcularPromedio (cod_tipo_hilaza NUMBER) is
 
     end;
 
-/*
--------------------------------------------------------------------------
-SELECTS
--------------------------------------------------------------------------
-*/
-
-/*
-Devuelve medidas y promedio por hilaza y talla mediante un cursor OUT.
-Ambos códigos son filtros opcionales; el resultado se ordena por hilaza y talla.
-*/
 PROCEDURE consultaTiHiProm ( cod_tipo_hilaza NUMBER, cod_talla NUMBER, cursor OUT SYS_REFCURSOR ) is
 
 begin
@@ -82,10 +59,9 @@ begin
             p.TIHPFEGE,
             u.USUANOMB AS NOMBRE_USUARIO
         FROM TIHIPROM p
-        /*
-        Los INNER JOIN requieren hilaza y talla coincidentes; el LEFT JOIN de usuario
-        conserva la información de promedio aunque no encuentre el nombre del usuario.
-        */
+        
+        -- Los INNER JOIN requieren hilaza y talla coincidentes; el LEFT JOIN de usuario conserva la información de promedio aunque no encuentre el nombre del usuario.
+        
         INNER JOIN TIPOHILA h
             ON p.TIHPHILA = h.TIHICODI
         INNER JOIN TALLA t
@@ -98,15 +74,7 @@ begin
 
 end;
 
-/*
--------------------------------------------------------------------------
-UPDATES
--------------------------------------------------------------------------
-*/
 
-/*
-Modifica medidas y datos de registro de la combinación hilaza-talla y recalcula su promedio.
-*/
 PROCEDURE actualizarTiHiProm (
     cod_tipo_hilaza NUMBER,
     cod_talla NUMBER,
@@ -116,10 +84,9 @@ PROCEDURE actualizarTiHiProm (
 ) is
 
     begin
-
-        /*
-        Ancho y peso deben ser positivos y no nulos; -20001 identifica ancho inválido y -20002 peso inválido.
-        */
+        
+        --Ancho y peso deben ser positivos y no nulos; -20001 identifica ancho inválido y -20002 peso inválido.
+        
         IF ancho_tihiprom <= 0 OR ancho_tihiprom IS NULL THEN
             RAISE_APPLICATION_ERROR(
                 -20001,
@@ -141,12 +108,10 @@ PROCEDURE actualizarTiHiProm (
             TIHPFEGE = SYSDATE,
             TIHPUSUA = usuario_tihiprom
 
-        WHERE TIHPHILA = cod_tipo_hilaza
-          AND TIHPTALL = cod_talla;
-
-        /*
-        -20021 informa que el UPDATE no encontró la combinación de hilaza y talla.
-        */
+        WHERE TIHPHILA = cod_tipo_hilaza 
+        AND TIHPTALL = cod_talla;
+  
+        -- -20021 informa que el UPDATE no encontró la combinación de hilaza y talla.
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20021,
@@ -154,21 +119,12 @@ PROCEDURE actualizarTiHiProm (
             );
         END IF;
 
-        /*
-        Propaga a todas las filas de la hilaza el promedio que incorpora el peso actualizado.
-        */
+        -- Propaga a todas las filas de la hilaza el promedio que incorpora el peso actualizado. 
         recalcularPromedio(cod_tipo_hilaza);
-
-        /*
-        Confirma la actualización de TIHIPROM.
-        Confirma los cambios y la transacción pendiente de la sesión.
-        */
+        
         COMMIT;
-
-        /*
-        Manejo general de excepciones:
-        ROLLBACK revierte la transacción pendiente de la sesión; RAISE propaga el error original.
-        */
+        
+        --Manejo general de excepciones: ROLLBACK revierte la transacción pendiente de la sesión; RAISE propaga el error original.
         EXCEPTION
             WHEN OTHERS THEN
                 ROLLBACK;
@@ -176,41 +132,28 @@ PROCEDURE actualizarTiHiProm (
 
     end;
 
-/*
--------------------------------------------------------------------------
-APLICAR TIPO DE HILAZA
--------------------------------------------------------------------------
-*/
+-- Aplica ancho y promedio de la hilaza al rendimiento vigente de sus tallas.
+-- Conserva el peso del rollo y confirma el conjunto de actualizaciones al terminar.
 
-/*
-Aplica ancho y promedio de la hilaza al rendimiento vigente de sus tallas.
-Conserva el peso del rollo y confirma el conjunto de actualizaciones al terminar.
-*/
 PROCEDURE aplicarTipoHilaza (
     cod_tipo_hilaza NUMBER,
     usuario_rendtall NUMBER
 ) is
 
-    /*
-    Resultados derivados que se guardarán en RENDTALL para cada talla recorrida.
-    */
+    -- Resultados derivados que se guardarán en RENDTALL para cada talla recorrida.
     rendimiento_rendtall NUMBER;
     metros_rendtall NUMBER;
-    /*
-    Peso vigente o promedio según la talla; el peso del rollo se toma siempre de RENDTALL.
-    */
+    
+    -- Peso promedio según la talla; el peso del rollo se toma siempre de RENDTALL.
     peso_rendtall NUMBER;
     rollo_rendtall NUMBER;
-    /*
-    Conteo de información asociada, usado para validar antes de continuar.
-    */
+    
+    -- Conteo de información asociada, usado para validar antes de continuar.
     cantidad_tihiprom NUMBER;
 
     begin
-
-        /*
-        COUNT detecta ausencia de filas en TIHIPROM; -20022 impide aplicar una hilaza sin información.
-        */
+        
+        -- COUNT detecta ausencia de filas en TIHIPROM; -20022 impide aplicar una hilaza sin información.
         SELECT COUNT(*)
         INTO cantidad_tihiprom
         FROM TIHIPROM
@@ -223,11 +166,8 @@ PROCEDURE aplicarTipoHilaza (
             );
         END IF;
 
-        /*
-          Recorre las tallas asociadas al tipo de hilaza y actualiza
-          la información vigente de RENDTALL. El cursor implícito enlaza TALLA para
-          obtener el nombre que determina el tratamiento de RIB y recorre por código.
-        */
+        
+          -- Recorre las tallas asociadas al tipo de hilaza y actualiza la información vigente de RENDTALL. El cursor implícito enlaza TALLA para obtener el nombre que determina el tratamiento de RIB y recorre por código.
         FOR registro IN (
 
             SELECT
@@ -241,13 +181,11 @@ PROCEDURE aplicarTipoHilaza (
             WHERE p.TIHPHILA = cod_tipo_hilaza
             ORDER BY p.TIHPTALL ASC
 
-        ) LOOP
-
-            /*
-              Obtiene el peso del rollo y el peso actualmente almacenado.
-              El peso del rollo no cambia al aplicar un tipo de hilaza.
-              NO_DATA_FOUND genera -20005 si la talla carece de rendimiento.
-            */
+        ) LOOP 
+              -- Obtiene el peso del rollo y el peso actualmente almacenado.
+              -- El peso del rollo no cambia al aplicar un tipo de hilaza.
+              -- NO_DATA_FOUND genera -20005 si la talla carece de rendimiento.
+            
             BEGIN
 
                 SELECT
@@ -270,37 +208,22 @@ PROCEDURE aplicarTipoHilaza (
 
             END;
 
-            /*
-              Para las tallas normales se utiliza el promedio del tipo
-              de hilaza como peso.
-
-              RIB conserva el peso que ya tiene registrado en RENDTALL.
-            */
+            
+              -- Para las tallas normales se utiliza el promedio del tipo de hilaza como peso.
+              -- RIB conserva el peso que ya tiene registrado en RENDTALL.
+            
             IF UPPER(TRIM(registro.TALLNOMB)) <> 'RIB' THEN
 
                 peso_rendtall := registro.TIHPPROM;
 
             END IF;
-
-            /*
-            El ancho duplicado y dividido entre 100 se multiplica por el peso seleccionado.
-            1000 dividido entre ese producto obtiene el rendimiento; el peso del rollo
-            por el rendimiento obtiene los metros, conservando el peso original del rollo.
-            */
-            rendimiento_rendtall :=
-                1000 /
-                (
-                    (registro.TIHPANCH * 2 / 100) *
-                    peso_rendtall
-                );
-
-            metros_rendtall :=
-                rollo_rendtall *
-                rendimiento_rendtall;
-
-            /*
-            -20006 rechaza rendimiento superior al límite documentado de 99.9 para RETAREND.
-            */
+            
+            -- El ancho duplicado y dividido entre 100 se multiplica por el peso seleccionado.
+            -- 1000 dividido entre ese producto obtiene el rendimiento; el peso del rollo por el rendimiento obtiene los metros, conservando el peso original del rollo.
+            rendimiento_rendtall := 1000 /((registro.TIHPANCH * 2 / 100) * peso_rendtall);
+            metros_rendtall :=rollo_rendtall * rendimiento_rendtall;
+            
+            -- -20006 rechaza rendimiento superior al límite documentado de 99.9 para RETAREND.
             IF rendimiento_rendtall > 99.9 THEN
 
                 RAISE_APPLICATION_ERROR(
@@ -310,9 +233,7 @@ PROCEDURE aplicarTipoHilaza (
 
             END IF;
 
-            /*
-            -20007 rechaza metros superiores al límite documentado de 99999.9 para RETAMETR.
-            */
+            -- -20007 rechaza metros superiores al límite documentado de 99999.9 para RETAMETR.
             IF metros_rendtall > 99999.9 THEN
 
                 RAISE_APPLICATION_ERROR(
@@ -322,10 +243,8 @@ PROCEDURE aplicarTipoHilaza (
 
             END IF;
 
-            /*
-            Sustituye las medidas y resultados vigentes, con fecha y usuario de aplicación.
-            RETAROLL no se modifica en esta operación.
-            */
+            --Sustituye las medidas y resultados vigentes, con fecha y usuario de aplicación. RETAROLL no se modifica en esta operación.
+            
             UPDATE RENDTALL
 
             SET RETAANCH = registro.TIHPANCH,
@@ -337,9 +256,8 @@ PROCEDURE aplicarTipoHilaza (
 
             WHERE RETATALL = registro.TIHPTALL;
 
-            /*
-            -20005 informa que el UPDATE no encontró rendimiento para la talla recorrida.
-            */
+            
+            -- -20005 informa que el UPDATE no encontró rendimiento para la talla recorrida.
             IF SQL%ROWCOUNT = 0 THEN
 
                 RAISE_APPLICATION_ERROR(
@@ -351,17 +269,10 @@ PROCEDURE aplicarTipoHilaza (
 
         END LOOP;
 
-        /*
-        Confirma la aplicación del tipo de hilaza en RENDTALL.
-        Confirma los cambios y la transacción pendiente de la sesión.
-        */
         COMMIT;
-
-        /*
-        Manejo general de excepciones:
-        Un error revierte las tallas ya actualizadas y la transacción pendiente de la sesión.
-        RAISE propaga el error original al llamador.
-        */
+        
+        -- Manejo general de excepciones: Un error revierte las tallas ya actualizadas y la transacción pendiente de la sesión. RAISE propaga el error original al llamador.
+        
         EXCEPTION
             WHEN OTHERS THEN
                 ROLLBACK;
@@ -369,15 +280,7 @@ PROCEDURE aplicarTipoHilaza (
 
     end;
 
-/*
--------------------------------------------------------------------------
-DELETES
--------------------------------------------------------------------------
-*/
 
-/*
-Elimina la combinación hilaza-talla y ajusta el promedio de las filas restantes.
-*/
 PROCEDURE eliminarTiHiProm (
     cod_tipo_hilaza NUMBER,
     cod_talla NUMBER
@@ -392,9 +295,8 @@ PROCEDURE eliminarTiHiProm (
         WHERE TIHPHILA = cod_tipo_hilaza
           AND TIHPTALL = cod_talla;
 
-        /*
-        -20021 informa que el DELETE no encontró la combinación de hilaza y talla.
-        */
+        -- -20021 informa que el DELETE no encontró la combinación de hilaza y talla.
+        
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20021,
@@ -402,22 +304,14 @@ PROCEDURE eliminarTiHiProm (
             );
         END IF;
 
-        /*
-          Al eliminar un peso cambia el promedio del tipo de hilaza,
-          por lo que se recalcula para los registros restantes.
-        */
+        
+        --- Al eliminar un peso cambia el promedio del tipo de hilaza, por lo que se recalcula para los registros restantes.
+        
         recalcularPromedio(cod_tipo_hilaza);
-
-        /*
-        Confirma la eliminación de TIHIPROM.
-        Confirma los cambios y la transacción pendiente de la sesión.
-        */
+        
         COMMIT;
-
-        /*
-        Manejo general de excepciones:
-        ROLLBACK revierte la transacción pendiente de la sesión; RAISE propaga el error original.
-        */
+ 
+        -- Manejo general de excepciones: ROLLBACK revierte la transacción pendiente de la sesión; RAISE propaga el error original.
         EXCEPTION
             WHEN OTHERS THEN
                 ROLLBACK;
@@ -425,12 +319,6 @@ PROCEDURE eliminarTiHiProm (
 
     end;
 
-/*
--------------------------------------------------------------------------
-INSERTS
--------------------------------------------------------------------------
-Registra una combinación nueva de hilaza y talla distinta de RIB y actualiza el promedio común.
-*/
 PROCEDURE insertarTiHiProm (
         cod_tipo_hilaza NUMBER,
         cod_talla NUMBER,
@@ -439,24 +327,18 @@ PROCEDURE insertarTiHiProm (
         usuario_tihiprom NUMBER
     ) is
 
-        /*
-        Conteo de existencia de la hilaza antes de registrar la relación.
-        */
+        -- Conteo de existencia de la hilaza antes de registrar la relación.
         cantidad_tipo_hilaza NUMBER;
-        /*
-        Conteo de información asociada, usado para validar antes de continuar.
-        */
+
+        -- Conteo de información asociada, usado para validar antes de continuar.
         cantidad_tihiprom NUMBER;
-        /*
-        Nombre del catálogo utilizado para excluir RIB tras quitar espacios y normalizar mayúsculas.
-        */
+        
+        -- Nombre utilizado para excluir RIB tras quitar espacios y normalizar mayúsculas.
         nombre_talla VARCHAR2(60);
 
         begin
 
-            /*
-            Ancho y peso deben ser positivos y no nulos; -20001 identifica ancho inválido y -20002 peso inválido.
-            */
+            -- Ancho y peso deben ser positivos y no nulos; -20001 identifica ancho inválido y -20002 peso inválido.
             IF ancho_tihiprom <= 0 OR ancho_tihiprom IS NULL THEN
                 RAISE_APPLICATION_ERROR(
                     -20001,
@@ -470,27 +352,22 @@ PROCEDURE insertarTiHiProm (
                     'El peso por metro cuadrado debe ser mayor que cero.'
                 );
             END IF;
-
-            /*
-            COUNT comprueba la entidad de origen; -20018 informa que la hilaza no existe.
-            */
+            
+            -- COUNT comprueba la entidad de origen; -20018 informa que la hilaza no existe.
             SELECT COUNT(*)
             INTO cantidad_tipo_hilaza
             FROM TIPOHILA
             WHERE TIHICODI = cod_tipo_hilaza;
 
             IF cantidad_tipo_hilaza = 0 THEN
-
                 RAISE_APPLICATION_ERROR(
                     -20018,
                     'El tipo de hilaza indicado no existe.'
                 );
 
             END IF;
-
-            /*
-            Obtiene el nombre necesario para validar RIB; NO_DATA_FOUND se traduce en -20004.
-            */
+            
+            -- Obtiene el nombre necesario para validar RIB; NO_DATA_FOUND se traduce en -20004. 
             BEGIN
 
                 SELECT TALLNOMB
@@ -508,10 +385,8 @@ PROCEDURE insertarTiHiProm (
                     );
 
             END;
-
-            /*
-            -20023 impide insertar RIB, identificada por nombre sin espacios extremos y en mayúsculas.
-            */
+            
+            -- -20023 impide insertar RIB, identificada por nombre sin espacios extremos y en mayúsculas.
             IF UPPER(TRIM(nombre_talla)) = 'RIB' THEN
 
                 RAISE_APPLICATION_ERROR(
@@ -520,12 +395,8 @@ PROCEDURE insertarTiHiProm (
                 );
 
             END IF;
-
-            /*
-            Verificar que la combinación tipo de hilaza y talla
-            no tenga información asociada. COUNT detecta duplicados y -20020
-            informa que la combinación ya está registrada.
-            */
+            
+            -- Verificar que la combinación tipo de hilaza y talla no tenga información asociada. COUNT detecta duplicados y -20020 informa que la combinación ya está registrada.
             SELECT COUNT(*)
             INTO cantidad_tihiprom
             FROM TIHIPROM
@@ -541,10 +412,9 @@ PROCEDURE insertarTiHiProm (
 
             END IF;
 
-            /*
-            Registra medidas, fecha y usuario con promedio inicialmente NULL;
-            recalcularPromedio lo establece junto con el de las demás filas de la hilaza.
-            */
+            
+            -- Registra medidas, fecha y usuario con promedio inicialmente NULL; recalcularPromedio lo establece junto con el de las demás filas de la hilaza.
+            
             INSERT INTO TIHIPROM (
                 TIHPHILA,
                 TIHPTALL,
@@ -564,24 +434,13 @@ PROCEDURE insertarTiHiProm (
                 SYSDATE,
                 usuario_tihiprom
             );
-
-            /*
-            Calcula nuevamente el promedio considerando el nuevo peso
-            y lo almacena en todos los registros del tipo de hilaza.
-            */
+  
+            -- Calcula nuevamente el promedio considerando el nuevo peso y lo almacena en todos los registros del tipo de hilaza.
             recalcularPromedio(cod_tipo_hilaza);
-
-            /*
-            Confirma la creación de TIHIPROM.
-            Confirma los cambios y la transacción pendiente de la sesión.
-            */
+            
             COMMIT;
 
-            /*
-            Manejo general de excepciones:
-            ROLLBACK revierte el registro, el recálculo y la transacción pendiente de la sesión.
-            RAISE propaga el error original al llamador.
-            */
+            -- Manejo general de excepciones: ROLLBACK revierte el registro, el recálculo y la transacción pendiente de la sesión. RAISE propaga el error original al llamador.
             EXCEPTION
                 WHEN OTHERS THEN
                     ROLLBACK;

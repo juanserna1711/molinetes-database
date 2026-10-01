@@ -22,10 +22,6 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
-Devuelve código, nombre y estado en un cursor OUT ordenado por código.
-Los filtros son opcionales; el nombre se busca parcialmente sin distinguir mayúsculas.
-*/
 PROCEDURE consultaTalla ( cod_talla NUMBER, nom_talla VARCHAR2, esta_talla VARCHAR2, cursor OUT SYS_REFCURSOR ) is
 
 begin
@@ -43,9 +39,7 @@ begin
 
 end;
 
-/*
-Sustituye nombre y estado de la talla indicada por su código.
-*/
+
 PROCEDURE actualizarTalla ( cod_talla NUMBER, nom_talla VARCHAR2, esta_talla VARCHAR2) is
 
     begin
@@ -56,26 +50,20 @@ PROCEDURE actualizarTalla ( cod_talla NUMBER, nom_talla VARCHAR2, esta_talla VAR
 
         WHERE TALLCODI = cod_talla;
 
-        /*
-        Valida que la TALLA exista.
-        -20004 informa que el UPDATE o DELETE precedente no encontró el código solicitado.
-        */
+        
+        -- Valida que la TALLA exista.
+        -- -20004 informa que el UPDATE o DELETE precedente no encontró el código solicitado.
+        
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20004,
                 'La talla indicada no existe.'
             );
         END IF;
-
-        /*
-        Confirma la actualización de TALLA.
-        */
+        
         COMMIT;
     end;
 
-/*
-Establece el estado A para la talla indicada, manteniendo sus datos asociados.
-*/
 PROCEDURE activarTalla ( cod_talla NUMBER) is
 
     begin
@@ -86,26 +74,21 @@ PROCEDURE activarTalla ( cod_talla NUMBER) is
 
         WHERE TALLCODI = cod_talla;
 
-        /*
-        -20004 informa que el UPDATE o DELETE precedente no encontró el código solicitado.
-        */
+        
+        -- -20004 informa que el UPDATE o DELETE precedente no encontró el código solicitado.
+        
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20004,
                 'La talla indicada no existe.'
             );
         END IF;
-
-        /*
-        Confirma el cambio de estado de la TALLA.
-        */
+        
         COMMIT;
 
     end;
 
-/*
-Establece el estado I para la talla indicada sin eliminarla.
-*/
+
 PROCEDURE desactivarTalla ( cod_talla NUMBER) is
 
     begin
@@ -116,38 +99,30 @@ PROCEDURE desactivarTalla ( cod_talla NUMBER) is
 
         WHERE TALLCODI = cod_talla;
 
-        /*
-        -20004 informa que el UPDATE o DELETE precedente no encontró el código solicitado.
-        */
+        
+        -- -20004 informa que el UPDATE o DELETE precedente no encontró el código solicitado.
+        
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20004,
                 'La talla indicada no existe.'
             );
         END IF;
-
-        /*
-        Confirma el cambio de estado de la TALLA.
-        */
+        
         COMMIT;
 
     end;
 
-/*
-Comprueba dependencias en RENDTALL y TIGIMOLI antes de eliminar la talla.
-*/
+
 PROCEDURE eliminarTalla (cod_talla number) is
-    /*
-    Conteos de las referencias que impiden eliminar la entidad de origen.
-    */
+    
+    -- Conteos de las referencias que impiden eliminar la entidad de origen.
     v_registros_rend NUMBER := 0;
     v_registros_tigimoli NUMBER := 0;
 
     begin
 
-        /*
-        RETATALL vincula el rendimiento con la talla; -20012 impide borrar tallas referenciadas.
-        */
+        -- RETATALL vincula el rendimiento con la talla; -20012 impide borrar tallas referenciadas.
         SELECT COUNT(*)
         INTO v_registros_rend
         FROM RENDTALL
@@ -161,9 +136,8 @@ PROCEDURE eliminarTalla (cod_talla number) is
 
         END IF;
 
-        /*
-        TGMOTALL vincula los cálculos con la talla; -20016 preserva la entidad de esos cálculos.
-        */
+        
+        -- TGMOTALL vincula los cálculos con la talla; -20016 preserva la entidad de esos cálculos.
         SELECT COUNT(*)
         INTO v_registros_tigimoli
         FROM TIGIMOLI
@@ -184,37 +158,28 @@ PROCEDURE eliminarTalla (cod_talla number) is
 
         WHERE TALLCODI = cod_talla;
 
-        /*
-        Valida que la TALLA haya existido antes de confirmar la eliminación.
-        -20004 informa que el UPDATE o DELETE precedente no encontró el código solicitado.
-        */
+        -- Valida que la TALLA haya existido antes de confirmar la eliminación.
+        -- -20004 informa que el UPDATE o DELETE precedente no encontró el código solicitado.
+        
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20004,
                 'La talla indicada no existe.'
             );
         END IF;
-
-        /*
-        Confirma la eliminación de TALLA.
-        */
+        
         COMMIT;
 
     end;
 
-/*
-Registra el código, nombre y estado recibidos en una nueva fila de TALLA.
-*/
+
 PROCEDURE insertarTalla (cod_talla number, nom_talla varchar2, esta_talla varchar2) is
     begin
 
         INSERT INTO TALLA (TALLCODI, TALLNOMB, TALLESTA)
 
         VALUES (cod_talla, nom_talla, esta_talla);
-
-        /*
-        Confirma la creación de TALLA.
-        */
+        
         COMMIT;
 
     end;

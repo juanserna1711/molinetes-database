@@ -18,29 +18,23 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-SELECTS
+--SELECTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Consulta de tallas y su rendimiento asociado con parámetros de nombre.
-Entrega el resultado mediante el cursor de salida.
-*/
+--Consulta de tallas y su rendimiento asociado con parámetros de nombre.
+
 PROCEDURE consultaRendTalla (
     nom_talla VARCHAR2,
     cursor out sys_refcursor
 );
-/*
--------------------------------------------------------------------------
-UPDATES
--------------------------------------------------------------------------
-*/
 
-/*
-Actualización del rendimiento asociado a cod_talla con ancho, peso, rollo y usuario.
-*/
+-------------------------------------------------------------------------
+--UPDATES
+-------------------------------------------------------------------------
+
+--Actualización del rendimiento asociado a cod_talla con ancho, peso, rollo y usuario.
+
 PROCEDURE actualizarRendTalla (
     cod_talla NUMBER,
     ancho_rendtall NUMBER,
@@ -49,28 +43,22 @@ PROCEDURE actualizarRendTalla (
     usuario_rendtall NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-DELETES
+--DELETES
 -------------------------------------------------------------------------
-*/
 
-/*
-Operación de eliminación de rendimiento con cod_talla como identificador.
-*/
+--Operación de eliminación de rendimiento con cod_talla como identificador.
+
 PROCEDURE eliminarRendTalla (
     cod_talla NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-INSERTS
+--INSERTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Inserción del rendimiento asociado a cod_talla con ancho, peso, rollo y usuario.
-*/
+--Inserción del rendimiento asociado a cod_talla con ancho, peso, rollo y usuario.
+
 PROCEDURE insertarRendTalla (
     cod_talla NUMBER,
     ancho_rendtall NUMBER,
@@ -79,9 +67,7 @@ PROCEDURE insertarRendTalla (
     usuario_rendtall NUMBER
 );
 
-/*
 ---------------------------------------------------------------------------------------------------------------
-*/
 
 end PKG_RENDTALLA;
 

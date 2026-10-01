@@ -19,10 +19,6 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
-Devuelve los datos del molinete por código opcional y coincidencia parcial de nombre.
-La búsqueda del nombre ignora mayúsculas; el cursor OUT queda ordenado por código.
-*/
 PROCEDURE consultaMolinete ( cod_molinete NUMBER, nom_molinete VARCHAR2, cursor OUT SYS_REFCURSOR ) is
 
 begin
@@ -40,16 +36,11 @@ begin
 
 end;
 
-/*
-Modifica nombre, RPM y perímetro del molinete indicado; valida los valores antes del UPDATE.
-*/
 PROCEDURE actualizarMolinete ( cod_molinete NUMBER, nom_molinete VARCHAR2, rpm_molinete NUMBER, peri_molinete NUMBER) is
 
     begin
 
-        /*
-        Rechaza RPM menores o iguales a cero o superiores a 999 con el error -20010.
-        */
+        --Rechaza RPM menores o iguales a cero o superiores a 999 con el error -20010.    
         IF rpm_molinete <= 0 OR rpm_molinete > 999 THEN
             RAISE_APPLICATION_ERROR(
                 -20010,
@@ -57,9 +48,7 @@ PROCEDURE actualizarMolinete ( cod_molinete NUMBER, nom_molinete VARCHAR2, rpm_m
             );
         END IF;
 
-        /*
-        Rechaza perímetros menores o iguales a cero o superiores a 999 con el error -20011.
-        */
+        --Rechaza perímetros menores o iguales a cero o superiores a 999 con el error -20011.
         IF peri_molinete <= 0 OR peri_molinete > 999 THEN
             RAISE_APPLICATION_ERROR(
                 -20011,
@@ -73,47 +62,35 @@ PROCEDURE actualizarMolinete ( cod_molinete NUMBER, nom_molinete VARCHAR2, rpm_m
 
         WHERE MOLICODI = cod_molinete;
 
-        /*
-        SQL%ROWCOUNT detecta que el UPDATE no encontró el código; -20009 informa su ausencia.
-        */
+        -- SQL%ROWCOUNT detecta que el UPDATE no encontró el código; -20009 informa su ausencia.
+        
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20009,
                 'El molinete indicado no existe.'
             );
         END IF;
-
-        /*
-        Confirma la actualización de MOLINETE.
-        COMMIT confirma la transacción pendiente de la sesión, incluidos estos cambios.
-        */
+        
         COMMIT;
 
-        /*
-        Manejo general de excepciones:
-        ROLLBACK revierte la transacción pendiente de la sesión y RAISE propaga el error original.
-        */
+        --Manejo general de excepciones: ROLLBACK revierte la transacción pendiente de la sesión y RAISE propaga el error original.
+        
         EXCEPTION
             WHEN OTHERS THEN
                 ROLLBACK;
                 RAISE;
     end;
 
-/*
-Elimina el molinete únicamente si no tiene cálculos asociados en TIGIMOLI.
-*/
 PROCEDURE eliminarMolinete (cod_molinete number) is
-    /*
-    Cantidad de cálculos que referencian el molinete mediante TGMOMOLI.
-    */
+    
+    --Cantidad de cálculos que referencian el molinete mediante TGMOMOLI.
     v_registros_tigimoli NUMBER := 0;
 
     begin
 
-        /*
-        Cuenta las referencias de TIGIMOLI para preservar los molinetes con cálculos registrados.
-        El error -20017 impide su eliminación cuando existe al menos una referencia.
-        */
+        --Cuenta las referencias de TIGIMOLI para preservar los molinetes con cálculos registrados.
+        -- El error -20017 impide su eliminación cuando existe al menos una referencia.
+        
         SELECT COUNT(*)
         INTO v_registros_tigimoli
         FROM TIGIMOLI
@@ -134,33 +111,25 @@ PROCEDURE eliminarMolinete (cod_molinete number) is
 
         WHERE MOLICODI = cod_molinete;
 
-        /*
-        Un DELETE sin filas afectadas indica código inexistente y genera el error -20009.
-        */
+        -- Un DELETE sin filas afectadas indica código inexistente y genera el error -20009.
+        
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20009,
                 'El molinete indicado no existe.'
             );
         END IF;
-
-        /*
-        Confirma la eliminación de MOLINETE.
-        COMMIT confirma la transacción pendiente de la sesión, incluidos estos cambios.
-        */
+        
         COMMIT;
 
     end;
 
-/*
-Registra código, nombre, RPM y perímetro tras validar los valores de operación.
-*/
 PROCEDURE insertarMolinete (cod_molinete number, nom_molinete varchar2, rpm_molinete number, peri_molinete number) is
     begin
 
-        /*
-        Rechaza RPM menores o iguales a cero o superiores a 999 con el error -20010.
-        */
+        
+        -- Rechaza RPM menores o iguales a cero o superiores a 999 con el error -20010.
+        
         IF rpm_molinete <= 0 OR rpm_molinete > 999 THEN
             RAISE_APPLICATION_ERROR(
                 -20010,
@@ -168,9 +137,9 @@ PROCEDURE insertarMolinete (cod_molinete number, nom_molinete varchar2, rpm_moli
             );
         END IF;
 
-        /*
-        Rechaza perímetros menores o iguales a cero o superiores a 999 con el error -20011.
-        */
+        
+        -- Rechaza perímetros menores o iguales a cero o superiores a 999 con el error -20011.
+        
         IF peri_molinete <= 0 OR peri_molinete > 999 THEN
             RAISE_APPLICATION_ERROR(
                 -20011,
@@ -182,16 +151,10 @@ PROCEDURE insertarMolinete (cod_molinete number, nom_molinete varchar2, rpm_moli
 
         VALUES (cod_molinete, nom_molinete, rpm_molinete, peri_molinete);
 
-        /*
-        Confirma la creación de MOLINETE.
-        COMMIT confirma la transacción pendiente de la sesión, incluidos estos cambios.
-        */
         COMMIT;
-
-        /*
-        Manejo general de excepciones:
-        ROLLBACK revierte la transacción pendiente de la sesión; RAISE conserva el error original.
-        */
+        
+        --Manejo general de excepciones: ROLLBACK revierte la transacción pendiente de la sesión; RAISE conserva el error original.
+        
         EXCEPTION
             WHEN OTHERS THEN
                 ROLLBACK;

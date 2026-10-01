@@ -19,81 +19,66 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-SELECTS
+--SELECTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Consulta de tallas con parámetros de código, nombre y estado; devuelve un cursor de salida.
-*/
+--Consulta de tallas con parámetros de código, nombre y estado; devuelve un cursor de salida.
+
 PROCEDURE consultaTalla (
     cod_talla NUMBER,
     nom_talla VARCHAR2,
     esta_talla VARCHAR2,
     cursor out sys_refcursor
 );
-/*
--------------------------------------------------------------------------
-UPDATES
--------------------------------------------------------------------------
-*/
 
-/*
-Actualización del nombre y estado de la talla identificada por su código.
-*/
+-------------------------------------------------------------------------
+--UPDATES
+-------------------------------------------------------------------------
+
+--Actualización del nombre y estado de la talla identificada por su código.
+
 PROCEDURE actualizarTalla (
     cod_talla NUMBER,
     nom_talla VARCHAR2,
     esta_talla VARCHAR2
 );
 
-/*
-Activación de la talla identificada por cod_talla.
-*/
+--Activación de la talla identificada por cod_talla.
+
 PROCEDURE activarTalla (
     cod_talla NUMBER
 );
 
-/*
-Desactivación de la talla identificada por cod_talla.
-*/
+--Desactivación de la talla identificada por cod_talla.
+
 PROCEDURE desactivarTalla (
     cod_talla NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-DELETES
+--DELETES
 -------------------------------------------------------------------------
-*/
 
-/*
-Eliminación de la talla identificada por cod_talla.
-*/
+--Eliminación de la talla identificada por cod_talla.
+
 PROCEDURE eliminarTalla (
     cod_talla NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-INSERTS
+--INSERTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Inserción de una talla con su código, nombre y estado.
-*/
+--Inserción de una talla con su código, nombre y estado.
+
 PROCEDURE insertarTalla (
     cod_talla NUMBER,
     nom_talla VARCHAR2,
     esta_talla VARCHAR2
 );
 
-/*
 ---------------------------------------------------------------------------------------------------------------
-*/
 
 end PKG_TALLA;
 

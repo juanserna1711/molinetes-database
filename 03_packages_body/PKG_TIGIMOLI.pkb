@@ -23,38 +23,32 @@ AS
 -- y generar la Orden de Trabajo asociada en ORDEPROD.
 --=============================================================================
 
-/*
--------------------------------------------------------------------------
-INSERTAR TIGIMOLI
--------------------------------------------------------------------------
-*/
 
-/*
-Procedimiento interno: calcula y registra un detalle técnico sin confirmar la transacción.
-Devuelve metros por rollo, metros totales y tiempo para registrar el mismo detalle en ORDEPROD.
-*/
+-------------------------------------------------------------------------
+-- INSERTAR TIGIMOLI
+-------------------------------------------------------------------------
+
 PROCEDURE insertarTigimoli (cod_moli NUMBER, cod_talla NUMBER, rollos NUMBER, rpm_calculo NUMBER, cod_tipo_hilaza NUMBER, usuario NUMBER, fecha_generacion DATE, metros_rollo OUT NUMBER, total_metros OUT NUMBER, tiempo_giro OUT NUMBER) is
 
-    /*
-    Perímetro leído del catálogo para convertir las RPM en longitud recorrida por minuto.
-    */
     perimetro NUMBER;
+    ancho_calculo NUMBER;
+    peso_calculo NUMBER;
+    peso_rollo NUMBER;
+    rendimiento_calculo NUMBER;
+    nombre_talla TALLA.TALLNOMB%TYPE;
 
 begin
 
-    /*
-      -20013 rechaza una cantidad de rollos nula o no positiva antes de obtener los metros totales.
-    */
+    -- -20013 rechaza una cantidad de rollos nula o no positiva antes de obtener los metros totales.
     IF rollos IS NULL OR rollos <= 0 THEN
         RAISE_APPLICATION_ERROR(
             -20013,
             'La cantidad de rollos debe ser mayor a cero.'
         );
     END IF;
-
-    /*
-      -20010 rechaza RPM nulas o no positivas para evitar un divisor inválido en el tiempo de giro.
-    */
+    
+    -- -20010 rechaza RPM nulas o no positivas para evitar un divisor inválido en el tiempo de giro.
+    
     IF rpm_calculo IS NULL OR rpm_calculo <= 0 THEN
         RAISE_APPLICATION_ERROR(
             -20010,
@@ -62,33 +56,125 @@ begin
         );
     END IF;
 
-    /*
-      Obtiene de RENDTALL los metros por rollo de la talla y los entrega en metros_rollo.
-      NO_DATA_FOUND se traduce en -20005 cuando no existe rendimiento asociado.
-    */
+    -- Obtiene el peso del rollo y el nombre de la talla.
+    -- El peso del rollo permanece como información propia de RENDTALL.
     BEGIN
 
-        SELECT RETAMETR
-        INTO metros_rollo
-        FROM RENDTALL
-        WHERE RETATALL = cod_talla;
+        SELECT
+            r.RETAROLL,
+            t.TALLNOMB
+        INTO
+            peso_rollo,
+            nombre_talla
+        FROM RENDTALL r
+        INNER JOIN TALLA t
+            ON r.RETATALL = t.TALLCODI
+        WHERE r.RETATALL = cod_talla;
 
     EXCEPTION
 
         WHEN NO_DATA_FOUND THEN
+
             RAISE_APPLICATION_ERROR(
                 -20005,
-                'La talla no tiene rendimiento asociado.'
+                'La talla no tiene información de rendimiento asociada.'
             );
 
     END;
 
-    /*
-      Consulta el perímetro configurado para el molinete.
-      El RPM es recibido porque corresponde al utilizado
-      específicamente para el cálculo. NO_DATA_FOUND se traduce en -20009
-      cuando no existe el molinete solicitado.
-    */
+    
+    -- RIB mantiene sus parámetros propios de RENDTALL porque no depende de un tipo de hilaza. Las demás tallas obtienen ancho y promedio directamente de TIHIPROM para la hilaza de esta programación.
+    IF UPPER(TRIM(nombre_talla)) = 'RIB' THEN
+
+        SELECT
+            RETAANCH,
+            RETAPESO
+        INTO
+            ancho_calculo,
+            peso_calculo
+        FROM RENDTALL
+        WHERE RETATALL = cod_talla;
+
+    ELSE
+
+        BEGIN
+
+            SELECT
+                TIHPANCH,
+                TIHPPROM
+            INTO
+                ancho_calculo,
+                peso_calculo
+            FROM TIHIPROM
+            WHERE TIHPHILA = cod_tipo_hilaza
+            AND TIHPTALL = cod_talla;
+
+        EXCEPTION
+
+            WHEN NO_DATA_FOUND THEN
+
+                RAISE_APPLICATION_ERROR(
+                    -20022,
+                    'La talla no tiene información asociada al tipo de hilaza seleccionado.'
+                );
+
+        END;
+
+    END IF;
+    
+    -- Valida los datos utilizados en el cálculo antes de realizar divisiones.
+    IF ancho_calculo IS NULL OR ancho_calculo <= 0 THEN
+
+        RAISE_APPLICATION_ERROR(
+            -20024,
+            'El ancho utilizado para el cálculo debe ser mayor a cero.'
+        );
+
+    END IF;
+
+    IF peso_calculo IS NULL OR peso_calculo <= 0 THEN
+
+        RAISE_APPLICATION_ERROR(
+            -20025,
+            'El peso utilizado para el cálculo debe ser mayor a cero.'
+        );
+
+    END IF;
+
+    IF peso_rollo IS NULL OR peso_rollo <= 0 THEN
+
+        RAISE_APPLICATION_ERROR(
+            -20026,
+            'El peso del rollo debe ser mayor a cero.'
+        );
+
+    END IF;
+
+    -- Calcula el rendimiento y los metros por rollo sin modificar RENDTALL.
+    rendimiento_calculo := 1000 /((ancho_calculo * 2 / 100) * peso_calculo);
+    metros_rollo := peso_rollo * rendimiento_calculo;
+    
+    --Mantiene los mismos límites utilizados por RENDTALL.
+    IF rendimiento_calculo > 99.9 THEN
+
+        RAISE_APPLICATION_ERROR(
+            -20006,
+            'El rendimiento calculado supera el máximo permitido de 99.9.'
+        );
+
+    END IF;
+
+    IF metros_rollo > 99999.9 THEN
+
+        RAISE_APPLICATION_ERROR(
+            -20007,
+            'Los metros por rollo calculados superan el máximo permitido de 99999.9.'
+        );
+
+    END IF;
+    
+      -- Consulta el perímetro configurado para el molinete.
+      -- El RPM es recibido porque corresponde al utilizado específicamente para el cálculo. NO_DATA_FOUND se traduce en -20009 cuando no existe el molinete solicitado.
     BEGIN
 
         SELECT MOLIPERI
@@ -106,9 +192,7 @@ begin
 
     END;
 
-    /*
-    -20011 impide calcular el tiempo con un perímetro nulo o no positivo.
-    */
+    -- -20011 impide calcular el tiempo con un perímetro nulo o no positivo.
     IF perimetro IS NULL OR perimetro <= 0 THEN
         RAISE_APPLICATION_ERROR(
             -20011,
@@ -116,20 +200,12 @@ begin
         );
     END IF;
 
-    /*
-      Multiplica los metros de un rollo por la cantidad asignada al detalle.
-      RPM por perímetro dividido entre 100 expresa metros recorridos por minuto
-      con el perímetro en centímetros; metros totales entre ese avance obtiene minutos.
-    */
+      -- Multiplica los metros de un rollo por la cantidad asignada al detalle.
+      -- RPM por perímetro dividido entre 100 expresa metros recorridos por minuto con el perímetro en centímetros; metros totales entre ese avance obtiene minutos.
     total_metros := metros_rollo * rollos;
+    tiempo_giro := total_metros / ((rpm_calculo * perimetro) / 100);
 
-    tiempo_giro :=
-        total_metros / ((rpm_calculo * perimetro) / 100);
-
-    /*
-      Conserva los metros, tiempo y RPM utilizados junto con molinete, talla,
-      tipo de hilaza, usuario y fecha comunes al registro de la orden.
-    */
+      -- Conserva los metros, tiempo y RPM utilizados junto con molinete, talla, tipo de hilaza, usuario y fecha comunes al registro de la orden.
     INSERT INTO TIGIMOLI (
         TGMOMOLI,
         TGMOTALL,
@@ -157,23 +233,18 @@ begin
 
 end;
 
-/*
--------------------------------------------------------------------------
-INSERTAR ORDEN DE PRODUCCIÓN
--------------------------------------------------------------------------
-*/
 
-/*
-Procedimiento interno: guarda un detalle de la orden con los resultados ya calculados.
-No recalcula ni confirma; participa en la transacción de registrarCalculoTigimoli.
-*/
+-------------------------------------------------------------------------
+--INSERTAR ORDEN DE PRODUCCIÓN
+-------------------------------------------------------------------------
+-- Procedimiento interno: guarda un detalle de la orden con los resultados ya calculados.
+
 PROCEDURE insertarOrdeProd (codigo_orden NUMBER, cod_tipo_hilaza NUMBER, cod_moli NUMBER, cod_talla NUMBER, rollos NUMBER, metros_rollo NUMBER, total_metros NUMBER, tiempo_giro NUMBER, usuario NUMBER, fecha_generacion DATE) is
 
 begin
-
-    /*
-      Registra el detalle del cálculo dentro de la Orden de Trabajo generada.
-    */
+    
+      -- Registra el detalle del cálculo dentro de la Orden de Trabajo generada.
+    
     INSERT INTO ORDEPROD (
         ORPRCODI,
         ORPRTIHI,
@@ -201,51 +272,34 @@ begin
 
 end;
 
-/*
--------------------------------------------------------------------------
-REGISTRAR CALCULO
--------------------------------------------------------------------------
-*/
 
-/*
-Coordina los detalles de TIGIMOLI y ORDEPROD en una transacción y devuelve codigo_orden.
-*/
+-------------------------------------------------------------------------
+--REGISTRAR CALCULO
+-------------------------------------------------------------------------
+-- Coordina los detalles de TIGIMOLI y ORDEPROD en una transacción y devuelve codigo_orden.
+
 PROCEDURE registrarCalculoTigimoli (codigos_molinetes t_lista_numeros, codigos_tallas t_lista_numeros, cantidades_rollos t_lista_numeros, rpms_molinetes t_lista_numeros, cod_tipo_hilaza NUMBER, usuario NUMBER, codigo_orden OUT NUMBER) is
-
-    /*
-    Marca temporal compartida por todos los detalles de ambas tablas.
-    */
+  
     fecha_generacion DATE;
-
-    /*
-    Resultados OUT del detalle técnico que se transfieren a insertarOrdeProd en cada iteración.
-    */
     metros_rollo NUMBER;
     total_metros NUMBER;
     tiempo_giro NUMBER;
 
-    /*
-    Conteos de existencia para las entidades comunes a todos los detalles.
-    */
+    -- Conteos de existencia para las entidades comunes a todos los detalles.
     cantidad_tipo_hilaza NUMBER;
     cantidad_usuario NUMBER;
 
 begin
 
-    /*
-      -20015 rechaza una lista de molinetes vacía para evitar una orden sin detalles.
-    */
+     -- -20015 rechaza una lista de molinetes vacía para evitar una orden sin detalles.
     IF codigos_molinetes.COUNT = 0 THEN
         RAISE_APPLICATION_ERROR(
             -20015,
             'El cálculo debe contener al menos un registro.'
         );
     END IF;
-
-    /*
-      -20014 rechaza listas con cantidades distintas. La iteración posterior usa
-      índices de 1 a COUNT en las cuatro listas y asocia los valores del mismo índice.
-    */
+    
+      -- -20014 rechaza listas con cantidades distintas. La iteración posterior usa índices de 1 a COUNT en las cuatro listas y asocia los valores del mismo índice.
     IF codigos_molinetes.COUNT <> codigos_tallas.COUNT
        OR codigos_molinetes.COUNT <> cantidades_rollos.COUNT
        OR codigos_molinetes.COUNT <> rpms_molinetes.COUNT
@@ -258,9 +312,7 @@ begin
 
     END IF;
 
-    /*
-      COUNT comprueba la existencia de la hilaza referenciada; -20018 informa su ausencia.
-    */
+      -- COUNT comprueba la existencia de la hilaza referenciada; -20018 informa su ausencia.
     SELECT COUNT(*)
     INTO cantidad_tipo_hilaza
     FROM TIPOHILA
@@ -273,9 +325,9 @@ begin
         );
     END IF;
 
-    /*
-      COUNT comprueba el usuario que se guardará en ambas tablas; -20008 informa su ausencia.
-    */
+    
+     -- COUNT comprueba el usuario que se guardará en ambas tablas; -20008 informa su ausencia.
+    
     SELECT COUNT(*)
     INTO cantidad_usuario
     FROM USUARIO
@@ -288,29 +340,21 @@ begin
         );
     END IF;
 
-    /*
-      Mantiene una única fecha de generación para todos los registros pertenecientes al mismo cálculo.
-    */
+      -- Mantiene una única fecha de generación para todos los registros pertenecientes al mismo cálculo.
     fecha_generacion := SYSDATE;
 
-    /*
-      Genera el consecutivo de la nueva Orden de Trabajo.
-
-      El bloqueo exclusivo serializa las escrituras de ORDEPROD antes de MAX + 1
-      y se mantiene hasta COMMIT o ROLLBACK. NVL permite iniciar en 1 si no hay órdenes.
-      El consecutivo se entrega por codigo_orden y se comparte entre los detalles.
-    */
+    -- Genera el consecutivo de la nueva Orden de Trabajo.
+    -- El bloqueo exclusivo serializa las escrituras de ORDEPROD antes de MAX + 1 y se mantiene hasta COMMIT o ROLLBACK. NVL permite iniciar en 1 si no hay órdenes.
+    --El consecutivo se entrega por codigo_orden y se comparte entre los detalles.
     LOCK TABLE ORDEPROD IN EXCLUSIVE MODE;
 
     SELECT NVL(MAX(ORPRCODI), 0) + 1
     INTO codigo_orden
     FROM ORDEPROD;
 
-    /*
-      Registra cada combinación molinete-talla en TIGIMOLI; sus tres resultados OUT
-      alimentan insertarOrdeProd para conservar los mismos valores en la orden.
-      Los procedimientos internos no confirman entre detalles.
-    */
+    
+    -- Registra cada combinación molinete-talla en TIGIMOLI.
+
     FOR i IN 1 .. codigos_molinetes.COUNT
     LOOP
 
@@ -342,16 +386,10 @@ begin
 
     END LOOP;
 
-    /*
-    Confirma todos los detalles de ambas tablas y la transacción pendiente de la sesión.
-    */
     COMMIT;
 
-EXCEPTION
-
-    /*
-    Revierte la transacción pendiente, incluidos detalles previos del ciclo, y propaga el error.
-    */
+EXCEPTION 
+    -- Revierte la transacción pendiente, incluidos detalles previos del ciclo, y propaga el error.
     WHEN OTHERS THEN
         ROLLBACK;
         RAISE;

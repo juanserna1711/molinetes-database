@@ -20,65 +20,51 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-SELECTS
+--SELECTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Consulta de tipos de hilaza con parámetros de código y nombre; devuelve un cursor de salida.
-*/
+--Consulta de tipos de hilaza con parámetros de código y nombre.
+
 PROCEDURE consultaTipoHilaza (
     cod_tipo_hilaza NUMBER,
     nom_tipo_hilaza VARCHAR2,
     cursor OUT SYS_REFCURSOR
 );
 
-/*
 -------------------------------------------------------------------------
-UPDATES
+--UPDATES
 -------------------------------------------------------------------------
-*/
 
-/*
-Actualización del nombre del tipo de hilaza identificado por su código.
-*/
+--Actualización del nombre del tipo de hilaza identificado por su código.
+
 PROCEDURE actualizarTipoHilaza (
     cod_tipo_hilaza NUMBER,
     nom_tipo_hilaza VARCHAR2
 );
 
-/*
 -------------------------------------------------------------------------
-DELETES
+--DELETES
 -------------------------------------------------------------------------
-*/
 
-/*
-Eliminación del tipo de hilaza identificado por cod_tipo_hilaza.
-*/
+--Eliminación del tipo de hilaza identificado por cod_tipo_hilaza.
+
 PROCEDURE eliminarTipoHilaza (
     cod_tipo_hilaza NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-INSERTS
+--INSERTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Inserción de un tipo de hilaza con su código y nombre.
-*/
+--Inserción de un tipo de hilaza con su código y nombre.
+
 PROCEDURE insertarTipoHilaza (
     cod_tipo_hilaza NUMBER,
     nom_tipo_hilaza VARCHAR2
 );
 
-/*
 ---------------------------------------------------------------------------------------------------------------
-*/
 
 end PKG_TIPOHILA;
 /

@@ -1,6 +1,5 @@
 CREATE OR REPLACE PACKAGE PKG_ORDEPROD
-
-AS
+as
 
 --=============================================================================
 -- Nombre responsabilidad: Crear la especificación (.pks) del paquete
@@ -21,16 +20,13 @@ AS
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-SELECTS
+--SELECTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Consulta de órdenes con parámetros de código, tipo de hilaza, fechas y paginación.
-Devuelve total_registros y el cursor de salida con el resultado de la consulta.
-*/
+--Consulta de órdenes con parámetros de código, tipo de hilaza, fechas y paginación.
+--Devuelve total_registros y el cursor de salida con el resultado de la consulta.
+
 PROCEDURE consultaOrdeProd (
     cod_orden NUMBER,
     cod_tipo_hilaza NUMBER,
@@ -42,13 +38,12 @@ PROCEDURE consultaOrdeProd (
     cursor OUT SYS_REFCURSOR
 );
 
-/*
-Consulta del detalle de la orden indicada por cod_orden mediante un cursor de salida.
-*/
+--Consulta del detalle de la orden indicada por cod_orden mediante un cursor de salida.
+
 PROCEDURE consultaDetalleOrdeProd (
     cod_orden NUMBER,
     cursor OUT SYS_REFCURSOR
 );
 
-END PKG_ORDEPROD;
+end PKG_ORDEPROD;
 /

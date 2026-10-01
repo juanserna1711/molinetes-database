@@ -17,30 +17,24 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-SELECTS
+--SELECTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Consulta de molinetes con parámetros de código y nombre; el resultado se entrega en el cursor de salida.
-*/
+--Consulta de molinetes con parámetros de código y nombre.
+
 PROCEDURE consultaMolinete (
     cod_molinete NUMBER,
     nom_molinete VARCHAR2,
     cursor out sys_refcursor
 );
 
-/*
 -------------------------------------------------------------------------
-UPDATES
+--UPDATES
 -------------------------------------------------------------------------
-*/
 
-/*
-Actualización del molinete por código con los valores nom_molinete, rpm_molinete y peri_molinete.
-*/
+--Actualización del molinete por código con los valores nom_molinete, rpm_molinete y peri_molinete.
+
 PROCEDURE actualizarMolinete (
     cod_molinete NUMBER,
     nom_molinete VARCHAR2,
@@ -48,28 +42,22 @@ PROCEDURE actualizarMolinete (
     peri_molinete NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-DELETES
+--DELETES
 -------------------------------------------------------------------------
-*/
 
-/*
-Eliminación del molinete identificado por su código.
-*/
+--Eliminación del molinete identificado por su código.
+
 PROCEDURE eliminarMolinete (
     cod_molinete NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-INSERTS
+--INSERTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Inserción de un molinete con los valores cod_molinete, nom_molinete, rpm_molinete y peri_molinete.
-*/
+--Inserción de un molinete con los valores cod_molinete, nom_molinete, rpm_molinete y peri_molinete.
+
 PROCEDURE insertarMolinete (
     cod_molinete NUMBER,
     nom_molinete VARCHAR2,
@@ -77,9 +65,7 @@ PROCEDURE insertarMolinete (
     peri_molinete NUMBER
 );
 
-/*
 ---------------------------------------------------------------------------------------------------------------
-*/
 
 end PKG_MOLINETE;
 

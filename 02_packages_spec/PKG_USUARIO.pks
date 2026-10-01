@@ -19,30 +19,25 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-SELECTS
+--SELECTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Consulta de usuarios con parámetros de código, nombre y estado; devuelve un cursor de salida.
-*/
+--Consulta de usuarios con parámetros de código, nombre y estado.
+
 PROCEDURE consultaUsuario (
     cod_usuario NUMBER,
     nom_usuario VARCHAR2,
     esta_usuario VARCHAR2,
     cursor out sys_refcursor
 );
-/*
--------------------------------------------------------------------------
-UPDATES
--------------------------------------------------------------------------
-*/
 
-/*
-Actualización del nombre, contraseña y estado del usuario identificado por su código.
-*/
+-------------------------------------------------------------------------
+--UPDATES
+-------------------------------------------------------------------------
+
+--Actualización del nombre, contraseña y estado del usuario identificado por su código.
+
 PROCEDURE actualizarUsuario (
     cod_usuario NUMBER,
     nom_usuario VARCHAR2,
@@ -50,42 +45,34 @@ PROCEDURE actualizarUsuario (
     esta_usuario VARCHAR2
 );
 
-/*
-Activación del usuario identificado por cod_usuario.
-*/
+--Activación del usuario identificado por cod_usuario.
+
 PROCEDURE activarUsuario (
     cod_usuario NUMBER
 );
 
-/*
-Desactivación del usuario identificado por cod_usuario.
-*/
+--Desactivación del usuario identificado por cod_usuario.
+
 PROCEDURE desactivarUsuario (
     cod_usuario NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-DELETES
+--DELETES
 -------------------------------------------------------------------------
-*/
 
-/*
-Eliminación del usuario identificado por cod_usuario.
-*/
+--Eliminación del usuario identificado por cod_usuario.
+
 PROCEDURE eliminarUsuario (
     cod_usuario NUMBER
 );
 
-/*
 -------------------------------------------------------------------------
-INSERTS
+--INSERTS
 -------------------------------------------------------------------------
-*/
 
-/*
-Inserción de un usuario con su código, nombre, contraseña y estado.
-*/
+--Inserción de un usuario con su código, nombre, contraseña y estado.
+
 PROCEDURE insertarUsuario (
     cod_usuario NUMBER,
     nom_usuario VARCHAR2,
@@ -93,9 +80,7 @@ PROCEDURE insertarUsuario (
     esta_usuario VARCHAR2
 );
 
-/*
 ---------------------------------------------------------------------------------------------------------------
-*/
 
 end PKG_USUARIO;
 

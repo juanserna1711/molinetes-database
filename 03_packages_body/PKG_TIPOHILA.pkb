@@ -22,10 +22,6 @@ as
 -- Descripcion:
 --=============================================================================
 
-/*
-Devuelve código y nombre en un cursor OUT ordenado por código.
-Los filtros son opcionales; el nombre admite coincidencia parcial sin distinguir mayúsculas.
-*/
 PROCEDURE consultaTipoHilaza ( cod_tipo_hilaza NUMBER, nom_tipo_hilaza VARCHAR2, cursor OUT SYS_REFCURSOR ) is
 
 begin
@@ -41,9 +37,7 @@ begin
 
 end;
 
-/*
-Actualiza el nombre del tipo de hilaza identificado por su código.
-*/
+
 PROCEDURE actualizarTipoHilaza ( cod_tipo_hilaza NUMBER, nom_tipo_hilaza VARCHAR2) is
 
     begin
@@ -54,37 +48,29 @@ PROCEDURE actualizarTipoHilaza ( cod_tipo_hilaza NUMBER, nom_tipo_hilaza VARCHAR
 
         WHERE TIHICODI = cod_tipo_hilaza;
 
-        /*
-        -20019 informa que el UPDATE no encontró el código solicitado.
-        */
+        
+        -- -20019 informa que el UPDATE no encontró el código solicitado.
+        
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20019,
                 'El tipo de hilaza indicado no existe.'
             );
         END IF;
-
-        /*
-        Confirma la actualización de TIPOHILA.
-        */
+        
         COMMIT;
     end;
 
-/*
-Comprueba la dependencia de TIHIPROM antes de borrar el tipo de hilaza.
-*/
+
 PROCEDURE eliminarTipoHilaza (cod_tipo_hilaza number) is
-    /*
-    Cantidad de filas de promedio que referencian la hilaza mediante TIHPHILA.
-    */
+    
+    -- Cantidad de filas de promedio que referencian la hilaza mediante TIHPHILA.
     v_registros_tihiprom NUMBER := 0;
 
     begin
 
-        /*
-        COUNT detecta promedios asociados; -20019 bloquea la eliminación para conservar su hilaza.
-        Este código también se utiliza más abajo para informar una hilaza inexistente.
-        */
+        -- COUNT detecta promedios asociados; -20019 bloquea la eliminación para conservar su hilaza.
+        -- Este código también se utiliza más abajo para informar una hilaza inexistente.
         SELECT COUNT(*)
         INTO v_registros_tihiprom
         FROM TIHIPROM
@@ -104,10 +90,8 @@ PROCEDURE eliminarTipoHilaza (cod_tipo_hilaza number) is
         FROM TIPOHILA
 
         WHERE TIHICODI = cod_tipo_hilaza;
-
-        /*
-        Un DELETE sin filas afectadas genera -20019 con el mensaje de hilaza inexistente.
-        */
+ 
+        -- Un DELETE sin filas afectadas genera -20019 con el mensaje de hilaza inexistente.
         IF SQL%ROWCOUNT = 0 THEN
             RAISE_APPLICATION_ERROR(
                 -20019,
@@ -115,26 +99,17 @@ PROCEDURE eliminarTipoHilaza (cod_tipo_hilaza number) is
             );
         END IF;
 
-        /*
-        Confirma la eliminación de TIPOHILA.
-        */
         COMMIT;
 
     end;
 
-/*
-Registra el código y nombre recibidos en el catálogo TIPOHILA.
-*/
 PROCEDURE insertarTipoHilaza (cod_tipo_hilaza number, nom_tipo_hilaza varchar2) is
     begin
 
         INSERT INTO TIPOHILA (TIHICODI, TIHINOMB)
 
         VALUES (cod_tipo_hilaza, nom_tipo_hilaza);
-
-        /*
-        Confirma la creación de TIPOHILA.
-        */
+        
         COMMIT;
 
     end;

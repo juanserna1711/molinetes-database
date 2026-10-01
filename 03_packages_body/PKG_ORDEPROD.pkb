@@ -1,6 +1,5 @@
 CREATE OR REPLACE PACKAGE BODY PKG_ORDEPROD
-
-AS
+as
 
 --=============================================================================
 -- Nombre responsabilidad: Implementar el cuerpo del paquete PKG_ORDEPROD.
@@ -21,29 +20,19 @@ AS
 -- Descripcion:
 --=============================================================================
 
-/*
 -------------------------------------------------------------------------
-CONSULTA
+-- CONSULTA
 -------------------------------------------------------------------------
-*/
 
-/*
-Devuelve el total de códigos de orden y una página del historial mediante parámetros OUT.
-*/
 PROCEDURE consultaOrdeProd (cod_orden NUMBER, cod_tipo_hilaza NUMBER, fecha_inicio DATE, fecha_fin DATE, pagina NUMBER, registros_pagina NUMBER, total_registros OUT NUMBER, cursor OUT SYS_REFCURSOR) is
-
-    /*
-    Página y tamaño efectivos tras aplicar valores por defecto y truncar decimales.
-    */
+   
+    -- Página y tamaño efectivos tras aplicar valores por defecto y truncar decimales. 
     v_pagina NUMBER;
     v_registros_pagina NUMBER;
 
 begin
 
-    /*
-      Usa página 1 y tamaño 10 cuando los valores son nulos o menores que uno.
-      Para los demás valores, TRUNC descarta la parte decimal.
-    */
+      -- Usa página 1 y tamaño 10 cuando los valores son nulos o menores que uno. Para los demás valores, TRUNC descarta la parte decimal.
     IF pagina IS NULL OR pagina < 1 THEN
         v_pagina := 1;
     ELSE
@@ -56,11 +45,7 @@ begin
         v_registros_pagina := TRUNC(registros_pagina);
     END IF;
 
-    /*
-      Cuenta los códigos de orden agrupados, no sus filas de detalle, antes de paginar.
-      Los filtros nulos no restringen la consulta. El intervalo de fechas incluye
-      el día inicial y todo el día final mediante un límite superior exclusivo.
-    */
+      -- Cuenta los códigos de orden agrupados, no sus filas de detalle, antes de paginar.
     SELECT COUNT(*)
     INTO total_registros
     FROM (
@@ -74,12 +59,10 @@ begin
         GROUP BY o.ORPRCODI
     );
 
-    /*
-      Agrupa los detalles por datos de cabecera y cuenta molinetes distintos por grupo.
-      Los LEFT JOIN aportan nombres sin excluir órdenes cuyo catálogo no tenga coincidencia.
-      ROW_NUMBER numera los grupos por fecha y código descendentes; el intervalo
-      calculado con página y tamaño selecciona las filas que devuelve el cursor.
-    */
+      -- Agrupa los detalles por datos de cabecera y cuenta molinetes distintos por grupo.
+      -- Los LEFT JOIN aportan nombres sin excluir órdenes cuyo catálogo no tenga coincidencia.
+      -- ROW_NUMBER numera los grupos por fecha y código descendentes; el intervalo calculado con página y tamaño selecciona las filas que devuelve el cursor.
+    
     OPEN cursor FOR
 
         SELECT
@@ -134,24 +117,17 @@ begin
 
 end;
 
-/*
 -------------------------------------------------------------------------
-CONSULTA DETALLE
+-- CONSULTA DETALLE
 -------------------------------------------------------------------------
-*/
 
-/*
-Devuelve el detalle de una orden, con totales por molinete repetidos en cada talla.
-*/
 PROCEDURE consultaDetalleOrdeProd (cod_orden NUMBER, cursor OUT SYS_REFCURSOR) is
 
 begin
 
-    /*
-      Consulta todos los detalles asociados a una Orden de Trabajo.
-      Los totales de rollos, metros y tiempo de giro se calculan independientemente para cada molinete.
-      El RPM utilizado se obtiene desde TIGIMOLI utilizando los datos compartidos por ambas tablas durante la generación del cálculo.
-    */
+      --Consulta todos los detalles asociados a una Orden de Trabajo.
+      --Los totales de rollos, metros y tiempo de giro se calculan independientemente para cada molinete.
+      --El RPM utilizado se obtiene desde TIGIMOLI utilizando los datos compartidos por ambas tablas durante la generación del cálculo.
     OPEN cursor FOR
 
         SELECT
@@ -167,10 +143,8 @@ begin
             o.ORPRCAME AS metros_rollo,
             o.ORPRCATO AS total_metros_talla,
 
-            /*
-            Las tres ventanas separan cada orden y molinete sin colapsar las filas de talla.
-            Suman respectivamente rollos, metros totales y tiempos guardados en ORDEPROD.
-            */
+            -- Las tres ventanas separan cada orden y molinete sin colapsar las filas de talla.
+            --Suman respectivamente rollos, metros totales y tiempos guardados en ORDEPROD.
             SUM(o.ORPRCARO) OVER (
                 PARTITION BY
                     o.ORPRCODI,
@@ -195,18 +169,17 @@ begin
             u.USUANOMB AS nombre_usuario
 
         FROM ORDEPROD o
-        /*
-        Molinete y talla requieren coincidencia; sus nombres y perímetro son del catálogo actual.
-        */
+        
+        --Molinete y talla requieren coincidencia; sus nombres y perímetro son del catálogo actual.
         INNER JOIN MOLINETE m ON o.ORPRMOLI = m.MOLICODI
         INNER JOIN TALLA t ON o.ORPRTALL = t.TALLCODI
         LEFT JOIN TIPOHILA h ON o.ORPRTIHI = h.TIHICODI
         LEFT JOIN USUARIO u ON o.ORPRUSUA = u.USUACODI
-        /*
-        Reduce TIGIMOLI a una fila por molinete, talla, fecha, usuario y tipo de hilaza.
-        MAX toma la RPM mayor del grupo; no selecciona el registro más reciente.
-        El LEFT JOIN conserva el detalle aunque no se encuentre una RPM asociada.
-        */
+        
+        --Reduce TIGIMOLI a una fila por molinete, talla, fecha, usuario y tipo de hilaza.
+        --MAX toma la RPM mayor del grupo; no selecciona el registro más reciente.
+        --El LEFT JOIN conserva el detalle aunque no se encuentre una RPM asociada.
+        
         LEFT JOIN (
             SELECT
                 TGMOMOLI,
@@ -226,9 +199,7 @@ begin
                 TGMOTIHI
         ) g
 
-            /*
-            Vincula el cálculo por los cinco datos compartidos, incluida la fecha exacta.
-            */
+            --Vincula el cálculo por los cinco datos compartidos, incluida la fecha exacta.
             ON g.TGMOMOLI = o.ORPRMOLI
             AND g.TGMOTALL = o.ORPRTALL
             AND g.TGMOFEGE = o.ORPRFEGE
@@ -243,5 +214,5 @@ begin
 
 end;
 
-END PKG_ORDEPROD;
+end PKG_ORDEPROD;
 /
