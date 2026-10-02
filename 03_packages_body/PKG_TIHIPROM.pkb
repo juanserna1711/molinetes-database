@@ -135,10 +135,7 @@ PROCEDURE actualizarTiHiProm (
 -- Aplica ancho y promedio de la hilaza al rendimiento vigente de sus tallas.
 -- Conserva el peso del rollo y confirma el conjunto de actualizaciones al terminar.
 
-PROCEDURE aplicarTipoHilaza (
-    cod_tipo_hilaza NUMBER,
-    usuario_rendtall NUMBER
-) is
+PROCEDURE aplicarTipoHilaza (cod_tipo_hilaza NUMBER, usuario_rendtall NUMBER) is
 
     -- Resultados derivados que se guardarán en RENDTALL para cada talla recorrida.
     rendimiento_rendtall NUMBER;
@@ -188,14 +185,15 @@ PROCEDURE aplicarTipoHilaza (
             
             BEGIN
 
-                SELECT
-                    RETAROLL,
-                    RETAPESO
-                INTO
-                    rollo_rendtall,
-                    peso_rendtall
-                FROM RENDTALL
-                WHERE RETATALL = registro.TIHPTALL;
+            SELECT
+                RETAROLL,
+                RETAPESO
+            INTO
+                rollo_rendtall,
+                peso_rendtall
+            FROM RENDTALL
+            WHERE RETATALL = registro.TIHPTALL
+            FOR UPDATE;
 
             EXCEPTION
 
@@ -269,22 +267,9 @@ PROCEDURE aplicarTipoHilaza (
 
         END LOOP;
 
-        COMMIT;
-        
-        -- Manejo general de excepciones: Un error revierte las tallas ya actualizadas y la transacción pendiente de la sesión. RAISE propaga el error original al llamador.
-        
-        EXCEPTION
-            WHEN OTHERS THEN
-                ROLLBACK;
-                RAISE;
-
     end;
 
-
-PROCEDURE eliminarTiHiProm (
-    cod_tipo_hilaza NUMBER,
-    cod_talla NUMBER
-) is
+PROCEDURE eliminarTiHiProm (cod_tipo_hilaza NUMBER, cod_talla NUMBER) is
 
     begin
 

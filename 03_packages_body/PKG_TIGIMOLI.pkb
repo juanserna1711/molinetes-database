@@ -1,6 +1,6 @@
 CREATE OR REPLACE PACKAGE BODY PKG_TIGIMOLI
 
-AS
+as
 
 --=============================================================================
 -- Nombre responsabilidad: Implementar el cuerpo del paquete PKG_TIGIMOLI.
@@ -31,11 +31,6 @@ AS
 PROCEDURE insertarTigimoli (cod_moli NUMBER, cod_talla NUMBER, rollos NUMBER, rpm_calculo NUMBER, cod_tipo_hilaza NUMBER, usuario NUMBER, fecha_generacion DATE, metros_rollo OUT NUMBER, total_metros OUT NUMBER, tiempo_giro OUT NUMBER) is
 
     perimetro NUMBER;
-    ancho_calculo NUMBER;
-    peso_calculo NUMBER;
-    peso_rollo NUMBER;
-    rendimiento_calculo NUMBER;
-    nombre_talla TALLA.TALLNOMB%TYPE;
 
 begin
 
@@ -56,25 +51,19 @@ begin
         );
     END IF;
 
-    -- Obtiene el peso del rollo y el nombre de la talla.
-    -- El peso del rollo permanece como información propia de RENDTALL.
+    -- Obtiene de RENDTALL los metros por rollo de la talla y los entrega en metros_rollo.
+    -- NO_DATA_FOUND se traduce en -20005 cuando no existe rendimiento asociado.
+    
     BEGIN
 
-        SELECT
-            r.RETAROLL,
-            t.TALLNOMB
-        INTO
-            peso_rollo,
-            nombre_talla
-        FROM RENDTALL r
-        INNER JOIN TALLA t
-            ON r.RETATALL = t.TALLCODI
-        WHERE r.RETATALL = cod_talla;
+        SELECT RETAMETR
+        INTO metros_rollo
+        FROM RENDTALL
+        WHERE RETATALL = cod_talla;
 
     EXCEPTION
 
         WHEN NO_DATA_FOUND THEN
-
             RAISE_APPLICATION_ERROR(
                 -20005,
                 'La talla no tiene información de rendimiento asociada.'
@@ -83,98 +72,8 @@ begin
     END;
 
     
-    -- RIB mantiene sus parámetros propios de RENDTALL porque no depende de un tipo de hilaza. Las demás tallas obtienen ancho y promedio directamente de TIHIPROM para la hilaza de esta programación.
-    IF UPPER(TRIM(nombre_talla)) = 'RIB' THEN
-
-        SELECT
-            RETAANCH,
-            RETAPESO
-        INTO
-            ancho_calculo,
-            peso_calculo
-        FROM RENDTALL
-        WHERE RETATALL = cod_talla;
-
-    ELSE
-
-        BEGIN
-
-            SELECT
-                TIHPANCH,
-                TIHPPROM
-            INTO
-                ancho_calculo,
-                peso_calculo
-            FROM TIHIPROM
-            WHERE TIHPHILA = cod_tipo_hilaza
-            AND TIHPTALL = cod_talla;
-
-        EXCEPTION
-
-            WHEN NO_DATA_FOUND THEN
-
-                RAISE_APPLICATION_ERROR(
-                    -20022,
-                    'La talla no tiene información asociada al tipo de hilaza seleccionado.'
-                );
-
-        END;
-
-    END IF;
-    
-    -- Valida los datos utilizados en el cálculo antes de realizar divisiones.
-    IF ancho_calculo IS NULL OR ancho_calculo <= 0 THEN
-
-        RAISE_APPLICATION_ERROR(
-            -20024,
-            'El ancho utilizado para el cálculo debe ser mayor a cero.'
-        );
-
-    END IF;
-
-    IF peso_calculo IS NULL OR peso_calculo <= 0 THEN
-
-        RAISE_APPLICATION_ERROR(
-            -20025,
-            'El peso utilizado para el cálculo debe ser mayor a cero.'
-        );
-
-    END IF;
-
-    IF peso_rollo IS NULL OR peso_rollo <= 0 THEN
-
-        RAISE_APPLICATION_ERROR(
-            -20026,
-            'El peso del rollo debe ser mayor a cero.'
-        );
-
-    END IF;
-
-    -- Calcula el rendimiento y los metros por rollo sin modificar RENDTALL.
-    rendimiento_calculo := 1000 /((ancho_calculo * 2 / 100) * peso_calculo);
-    metros_rollo := peso_rollo * rendimiento_calculo;
-    
-    --Mantiene los mismos límites utilizados por RENDTALL.
-    IF rendimiento_calculo > 99.9 THEN
-
-        RAISE_APPLICATION_ERROR(
-            -20006,
-            'El rendimiento calculado supera el máximo permitido de 99.9.'
-        );
-
-    END IF;
-
-    IF metros_rollo > 99999.9 THEN
-
-        RAISE_APPLICATION_ERROR(
-            -20007,
-            'Los metros por rollo calculados superan el máximo permitido de 99999.9.'
-        );
-
-    END IF;
-    
-      -- Consulta el perímetro configurado para el molinete.
-      -- El RPM es recibido porque corresponde al utilizado específicamente para el cálculo. NO_DATA_FOUND se traduce en -20009 cuando no existe el molinete solicitado.
+    -- Consulta el perímetro configurado para el molinete.
+    -- El RPM es recibido porque corresponde al utilizado específicamente para el cálculo. NO_DATA_FOUND se traduce en -20009 cuando no existe el molinete solicitado.
     BEGIN
 
         SELECT MOLIPERI
@@ -200,12 +99,12 @@ begin
         );
     END IF;
 
-      -- Multiplica los metros de un rollo por la cantidad asignada al detalle.
-      -- RPM por perímetro dividido entre 100 expresa metros recorridos por minuto con el perímetro en centímetros; metros totales entre ese avance obtiene minutos.
     total_metros := metros_rollo * rollos;
     tiempo_giro := total_metros / ((rpm_calculo * perimetro) / 100);
 
-      -- Conserva los metros, tiempo y RPM utilizados junto con molinete, talla, tipo de hilaza, usuario y fecha comunes al registro de la orden.
+
+    -- Conserva los metros, tiempo y RPM utilizados junto con molinete, talla,
+    -- tipo de hilaza, usuario y fecha comunes al registro de la orden.
     INSERT INTO TIGIMOLI (
         TGMOMOLI,
         TGMOTALL,
@@ -230,15 +129,9 @@ begin
         rpm_calculo,
         cod_tipo_hilaza
     );
-
 end;
 
-
--------------------------------------------------------------------------
---INSERTAR ORDEN DE PRODUCCIÓN
--------------------------------------------------------------------------
 -- Procedimiento interno: guarda un detalle de la orden con los resultados ya calculados.
-
 PROCEDURE insertarOrdeProd (codigo_orden NUMBER, cod_tipo_hilaza NUMBER, cod_moli NUMBER, cod_talla NUMBER, rollos NUMBER, metros_rollo NUMBER, total_metros NUMBER, tiempo_giro NUMBER, usuario NUMBER, fecha_generacion DATE) is
 
 begin
@@ -277,7 +170,6 @@ end;
 --REGISTRAR CALCULO
 -------------------------------------------------------------------------
 -- Coordina los detalles de TIGIMOLI y ORDEPROD en una transacción y devuelve codigo_orden.
-
 PROCEDURE registrarCalculoTigimoli (codigos_molinetes t_lista_numeros, codigos_tallas t_lista_numeros, cantidades_rollos t_lista_numeros, rpms_molinetes t_lista_numeros, cod_tipo_hilaza NUMBER, usuario NUMBER, codigo_orden OUT NUMBER) is
   
     fecha_generacion DATE;
@@ -340,7 +232,10 @@ begin
         );
     END IF;
 
-      -- Mantiene una única fecha de generación para todos los registros pertenecientes al mismo cálculo.
+    -- Aplica la hilaza sobre RENDTALL y mantiene bloqueadas las filas hasta que esta transacción confirme o revierta todos los cambios.
+    PKG_TIHIPROM.aplicarTipoHilaza(cod_tipo_hilaza => cod_tipo_hilaza, usuario_rendtall => usuario);
+
+    -- Mantiene una única fecha de generación para todos los registros pertenecientes al mismo cálculo.
     fecha_generacion := SYSDATE;
 
     -- Genera el consecutivo de la nueva Orden de Trabajo.
@@ -396,5 +291,5 @@ EXCEPTION
 
 end;
 
-END PKG_TIGIMOLI;
+end PKG_TIGIMOLI;
 /
